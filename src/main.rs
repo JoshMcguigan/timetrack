@@ -2,8 +2,6 @@ extern crate notify;
 extern crate clap;
 use clap::{Arg, App};
 
-extern crate chrono;
-
 use std::fs::OpenOptions;
 use std::io::Write;
 use notify::{Watcher, RecursiveMode, RawEvent, raw_watcher};

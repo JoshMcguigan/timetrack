@@ -1,27 +1,24 @@
-use chrono::DateTime;
-use chrono::Utc;
-use chrono::TimeZone;
 use std::collections::HashMap;
 
 #[derive(PartialEq, Debug)]
 struct RawLog {
     name: String,
-    timestamp: i64,
+    timestamp: u64,
 }
 
 struct Span {
     name: String,
-    start: DateTime<Utc>,
-    end: DateTime<Utc>,
+    start: u64,
+    end: u64,
 }
 
 impl Span {
-    fn duration(&self) -> i64 {
-        (self.end-self.start).num_seconds()
+    fn duration(&self) -> u64 {
+        self.end-self.start
     }
 }
 
-pub fn parse_raw_data(raw_data: String) -> HashMap<String, i64> {
+pub fn parse_raw_data(raw_data: String) -> HashMap<String, u64> {
     calculate_project_total_time(get_spans_from(raw_logs_from(raw_data)))
 }
 
@@ -39,7 +36,7 @@ impl<'a> From<&'a str> for RawLog {
     fn from(raw_data: &'a str) -> Self {
         // TODO convert this to try_from
         let mut parts = raw_data.split("/");
-        RawLog { name: parts.next().unwrap().to_string(), timestamp: parts.next().unwrap().parse::<i64>().unwrap() }
+        RawLog { name: parts.next().unwrap().to_string(), timestamp: parts.next().unwrap().parse::<u64>().unwrap() }
     }
 }
 
@@ -52,22 +49,20 @@ fn get_spans_from(mut raw_logs: Vec<RawLog>) -> Vec<Span> {
 
     let first_log = raw_logs.remove(0);
 
-    let date_time = Utc.timestamp(first_log.timestamp, 0);
-    let mut span = Span {name: String::from(first_log.name), start: date_time, end: date_time};
+    let mut span = Span {name: String::from(first_log.name), start: first_log.timestamp, end: first_log.timestamp};
     for log in raw_logs {
         if log.name == span.name {
-            span.end = Utc.timestamp(log.timestamp, 0);
+            span.end = log.timestamp;
         } else {
             spans.push(span);
-            let date_time = Utc.timestamp(log.timestamp, 0);
-            span = Span {name: String::from(log.name), start: date_time, end: date_time};
+            span = Span {name: String::from(log.name), start: log.timestamp, end: log.timestamp};
         }
     }
     spans.push(span);
     spans
 }
 
-fn calculate_project_total_time(spans: Vec<Span>) -> HashMap<String, i64> {
+fn calculate_project_total_time(spans: Vec<Span>) -> HashMap<String, u64> {
     let mut project_totals = HashMap::new();
 
     for span in spans {
@@ -141,13 +136,13 @@ mod tests {
     fn calculate_project_total_time_single_project() {
         let mut spans = vec![];
         let proj_1_name = "proj1";
-        spans.push(Span { name: String::from("proj1"), start: Utc.timestamp(1, 0), end: Utc.timestamp(5, 0)});
-        spans.push(Span { name: String::from("proj1"), start: Utc.timestamp(11, 0), end: Utc.timestamp(26, 0)});
+        spans.push(Span { name: String::from("proj1"), start:1, end: 5});
+        spans.push(Span { name: String::from("proj1"), start: 11, end: 26});
 
         let project_totals = calculate_project_total_time(spans);
 
         assert!(project_totals.contains_key(proj_1_name));
-        assert_eq!(19i64, *project_totals.get(proj_1_name).unwrap());
+        assert_eq!(19u64, *project_totals.get(proj_1_name).unwrap());
     }
 
     #[test]
@@ -155,16 +150,16 @@ mod tests {
         let mut spans = vec![];
         let proj_1_name = "proj1";
         let proj_2_name = "proj2";
-        spans.push(Span { name: String::from("proj1"), start: Utc.timestamp(1, 0), end: Utc.timestamp(5, 0)});
-        spans.push(Span { name: String::from("proj2"), start: Utc.timestamp(7, 0), end: Utc.timestamp(12, 0)});
-        spans.push(Span { name: String::from("proj1"), start: Utc.timestamp(11, 0), end: Utc.timestamp(26, 0)});
+        spans.push(Span { name: String::from("proj1"), start: 1, end: 5});
+        spans.push(Span { name: String::from("proj2"), start: 7, end: 12});
+        spans.push(Span { name: String::from("proj1"), start: 11, end: 26});
 
         let project_totals = calculate_project_total_time(spans);
 
         assert!(project_totals.contains_key(proj_1_name));
-        assert_eq!(19i64, *project_totals.get(proj_1_name).unwrap());
+        assert_eq!(19u64, *project_totals.get(proj_1_name).unwrap());
         assert!(project_totals.contains_key(proj_2_name));
-        assert_eq!(5i64, *project_totals.get(proj_2_name).unwrap());
+        assert_eq!(5u64, *project_totals.get(proj_2_name).unwrap());
     }
 
     #[test]
@@ -180,6 +175,6 @@ mod tests {
     #[test]
     fn raw_log_from_str() {
         let raw_data = "josh/123";
-        assert_eq!(RawLog {name: String::from("josh"), timestamp: 123i64 }, RawLog::from(raw_data));
+        assert_eq!(RawLog {name: String::from("josh"), timestamp: 123u64 }, RawLog::from(raw_data));
     }
 }
