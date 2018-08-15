@@ -16,7 +16,8 @@ static ROOT_PATH : &'static str = "/Users/josh/Projects";
 static RAW_DATA_FILE : &'static str = "/Users/josh/.timetrack_raw";
 
 fn handle_event(path: Cow<str>){
-    if !path.contains("/.") {
+    // TODO handle file system separators in platform independent way
+    if !path.contains(RAW_DATA_FILE) {
         let project = path
             .trim_left_matches(ROOT_PATH)
             .trim_left_matches("/")
@@ -41,16 +42,11 @@ fn main() {
         .get_matches();
 
     if matches.is_present("track") {
-
-        // Create a channel to receive the events.
         let (tx, rx) = channel();
 
-        // Create a watcher object, delivering raw events.
-        // The notification back-end is selected based on the platform.
+        // TODO convert to debounced watcher, or debounce in some other way
         let mut watcher = raw_watcher(tx).unwrap();
 
-        // Add a path to be watched. All files and directories at that path and
-        // below will be monitored for changes.
         watcher.watch(ROOT_PATH, RecursiveMode::Recursive).unwrap();
 
         loop {
