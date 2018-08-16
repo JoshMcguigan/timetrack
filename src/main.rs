@@ -14,6 +14,7 @@ static ROOT_PATH : &'static str = "/Users/josh/Projects";
 static RAW_DATA_FILE : &'static str = "/Users/josh/.timetrack_raw";
 
 fn main() {
+    // todo add cli option to clear history
     let matches = App::new("TimeTrack")
         .arg(Arg::with_name("track")
             .short("t")
