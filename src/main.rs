@@ -1,37 +1,17 @@
-extern crate notify;
 extern crate clap;
-use clap::{Arg, App};
+extern crate notify;
 
+use clap::{App, Arg};
+use notify::{raw_watcher, RawEvent, RecursiveMode, Watcher};
 use std::fs::OpenOptions;
-use std::io::Write;
-use notify::{Watcher, RecursiveMode, RawEvent, raw_watcher};
-use std::sync::mpsc::channel;
-use std::borrow::Cow;
-use std::time::SystemTime;
 use std::io::Read;
+use std::sync::mpsc::channel;
 
+mod track;
 mod calc;
 
 static ROOT_PATH : &'static str = "/Users/josh/Projects";
 static RAW_DATA_FILE : &'static str = "/Users/josh/.timetrack_raw";
-
-fn handle_event(path: Cow<str>){
-    // TODO handle file system separators in platform independent way
-    if !path.contains(RAW_DATA_FILE) {
-        let project = path
-            .trim_left_matches(ROOT_PATH)
-            .trim_left_matches("/")
-            .split("/").next().unwrap();
-        let mut file = OpenOptions::new()
-            .read(true)
-            .write(true)
-            .create(true)
-            .append(true)
-            .open(RAW_DATA_FILE).unwrap();
-        let time = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs();
-        write!(&mut file, "{}/{}\n", project, time);
-    }
-}
 
 fn main() {
     let matches = App::new("TimeTrack")
@@ -52,7 +32,7 @@ fn main() {
         loop {
             match rx.recv() {
                 Ok(RawEvent{path: Some(path), ..}) => {
-                    handle_event(path.to_string_lossy());
+                    track::handle_event(path);
                 },
                 Ok(event) => println!("broken event: {:?}", event),
                 Err(e) => println!("watch error: {:?}", e),
