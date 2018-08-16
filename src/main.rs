@@ -2,7 +2,7 @@ extern crate clap;
 use clap::{App, Arg};
 
 extern crate timetrack;
-use timetrack::{track::track, calc::calc};
+use timetrack::{track::track, calc::calc, clear::clear};
 
 fn main() {
     // todo add cli option to clear history
@@ -11,7 +11,16 @@ fn main() {
             .short("t")
             .long("track")
             .help("Set to track, otherwise show data"))
+        .arg(Arg::with_name("clear")
+            .short("c")
+            .long("clear")
+            .help("Clear all data"))
         .get_matches();
+
+    if matches.is_present("clear") {
+        clear();
+        return; // clear should not run track/calc after
+    }
 
     if matches.is_present("track") {
         track();
