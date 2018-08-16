@@ -71,10 +71,19 @@ fn handle_event<T>(path: T)
 
 #[cfg(test)]
 mod tests {
-//    use super::*;
+    use super::*;
 
     #[test]
-    fn it_works() {
+    fn extract_project_name_some() {
+        let event_path = PathBuf::from(ROOT_PATH.to_string() + "/testProj/file1.rs");
 
+        assert_eq!(Some("testProj".to_string()), extract_project_name(event_path));
+    }
+
+    #[test]
+    fn extract_project_name_none() {
+        let event_path = PathBuf::from(RAW_DATA_FILE);
+
+        assert_eq!(None, extract_project_name(event_path));
     }
 }

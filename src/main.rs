@@ -18,6 +18,7 @@ fn main() {
         .get_matches();
 
     if matches.is_present("clear") {
+        // TODO don't unwrap inside the library calls, handle errors here and exit with appropriate error message and exit code
         clear();
         return; // clear should not run track/calc after
     }
