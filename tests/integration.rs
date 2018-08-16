@@ -49,7 +49,7 @@ fn create_filesystem_noise(){
 }
 
 #[test]
-#[ignore] // WARNING: this test clears all timetrack history
+#[ignore] // WARNING: this test clears all timetrack history, TODO perhaps move the existing history file before testing then move it back?
 fn integration() {
     clear_and_verify();
 

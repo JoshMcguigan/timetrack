@@ -5,24 +5,39 @@ use std::time::SystemTime;
 use std::io::Write;
 use std::path::PathBuf;
 use std::sync::mpsc::channel;
-use notify::{raw_watcher, RawEvent, RecursiveMode, Watcher};
+use notify::{RecursiveMode, Watcher, RecommendedWatcher, DebouncedEvent};
+use std::time::Duration;
 
 pub fn track() {
     let (tx, rx) = channel();
 
-    // TODO convert to debounced watcher, or debounce in some other way
-    let mut watcher = raw_watcher(tx).unwrap();
+    let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_secs(2)).unwrap();
 
     watcher.watch(ROOT_PATH, RecursiveMode::Recursive).unwrap();
 
     loop {
         match rx.recv() {
-            Ok(RawEvent{path: Some(path), ..}) => {
-                handle_event(path);
+            Ok(event) => {
+                if let Some(path) = get_path_from_event(&event) {
+                    store_path(path);
+                }
             },
-            Ok(event) => println!("broken event: {:?}", event),
             Err(e) => println!("watch error: {:?}", e),
-        }
+        };
+    }
+}
+
+fn get_path_from_event(event: &DebouncedEvent) -> Option<&Path> {
+    match event {
+        DebouncedEvent::NoticeWrite(path) |
+        DebouncedEvent::NoticeRemove(path) |
+        DebouncedEvent::Create(path) |
+        DebouncedEvent::Write(path) |
+        DebouncedEvent::Chmod(path) |
+        DebouncedEvent::Remove(path) |
+        DebouncedEvent::Rename(_, path) => { Some(path.as_ref()) }, // TODO use both paths from rename?
+        DebouncedEvent::Rescan |
+        DebouncedEvent::Error(_, _) => { None },
     }
 }
 
@@ -52,7 +67,7 @@ fn extract_project_name<T>(path: T) -> Option<String>
     None
 }
 
-fn handle_event<T>(path: T)
+fn store_path<T>(path: T)
     where T: AsRef<Path>
 {
     if let Some(data) = extract_project_name(path) {
