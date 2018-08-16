@@ -1,6 +1,22 @@
 use std::collections::HashMap;
+use std::fs::OpenOptions;
+use RAW_DATA_FILE;
+use std::io::Read;
 
 const MAX_SECONDS_BETWEEN_RECORDS_IN_SPAN: u64 = 5 * 60;
+
+pub fn calc() {
+    let mut file = OpenOptions::new()
+        .read(true)
+        .write(true)
+        .open(RAW_DATA_FILE).unwrap();
+
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)
+        .expect("something went wrong reading the file");
+
+    println!("{:?}", parse_raw_data(contents));
+}
 
 #[derive(PartialEq, Debug)]
 struct RawLog {

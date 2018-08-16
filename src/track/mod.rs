@@ -4,6 +4,27 @@ use std::fs::OpenOptions;
 use std::time::SystemTime;
 use std::io::Write;
 use std::path::PathBuf;
+use std::sync::mpsc::channel;
+use notify::{raw_watcher, RawEvent, RecursiveMode, Watcher};
+
+pub fn track() {
+    let (tx, rx) = channel();
+
+    // TODO convert to debounced watcher, or debounce in some other way
+    let mut watcher = raw_watcher(tx).unwrap();
+
+    watcher.watch(ROOT_PATH, RecursiveMode::Recursive).unwrap();
+
+    loop {
+        match rx.recv() {
+            Ok(RawEvent{path: Some(path), ..}) => {
+                handle_event(path);
+            },
+            Ok(event) => println!("broken event: {:?}", event),
+            Err(e) => println!("watch error: {:?}", e),
+        }
+    }
+}
 
 fn get_project_name_from_path(path: &Path) -> String {
     path
@@ -31,7 +52,7 @@ fn extract_project_name<T>(path: T) -> Option<String>
     None
 }
 
-pub fn handle_event<T>(path: T)
+fn handle_event<T>(path: T)
     where T: AsRef<Path>
 {
     if let Some(data) = extract_project_name(path) {
