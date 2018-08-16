@@ -14,6 +14,9 @@ TimeTrack is currently in the very early stages of development.
     
     # to see the results
     cargo run
+    
+    # to clear the tracking history
+    cargo run -- --clear
 ```
 
 ## License
