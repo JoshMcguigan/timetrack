@@ -1,6 +1,13 @@
 use std::process::Child;
 use std::process::Command;
 use std::process::Stdio;
+use std::time;
+use std::thread;
+use std::fs::OpenOptions;
+use std::fs;
+use std::io::Write;
+extern crate timetrack;
+use timetrack::ROOT_PATH;
 
 fn tracker_proc() -> Child {
     Command::new("cargo")
@@ -44,12 +51,30 @@ fn clear_and_verify() {
 }
 
 fn create_filesystem_noise(){
-    let mut dummy_proc = calc_proc(); // dummy process creates traffic on the file system
-    dummy_proc.wait().unwrap();
+    let test_file_path = ROOT_PATH.to_owned() + "/timetrack/__integration_test__";
+
+    {
+        let mut file = OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create(true)
+            .append(true)
+            .open(&test_file_path).unwrap();
+        write!(file, "testing");
+    }
+
+    let sleep_duration = time::Duration::from_millis(500);
+    thread::sleep(sleep_duration);
+
+    fs::remove_file(&test_file_path).unwrap();
+
+    // sleep to ensure file system noise was captured
+    let sleep_duration = time::Duration::from_millis(2500);
+    thread::sleep(sleep_duration);
 }
 
 #[test]
-#[ignore] // WARNING: this test clears all timetrack history, TODO perhaps move the existing history file before testing then move it back?
+//#[ignore] // WARNING: this test clears all timetrack history, TODO perhaps move the existing history file before testing then move it back?
 fn integration() {
     clear_and_verify();
 
@@ -57,13 +82,13 @@ fn integration() {
 
     create_filesystem_noise();
 
+    tracker.kill().expect("command wasn't running");
+
     let calc = calc_proc();
 
     let output = calc
         .wait_with_output()
         .expect("failed to wait on child");
-
-    tracker.kill().expect("command wasn't running");
 
     let output_text = String::from_utf8_lossy(output.stdout.as_ref());
 

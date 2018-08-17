@@ -29,13 +29,13 @@ pub fn track() {
 
 fn get_path_from_event(event: &DebouncedEvent) -> Option<&Path> {
     match event {
-        DebouncedEvent::NoticeWrite(path) |
-        DebouncedEvent::NoticeRemove(path) |
         DebouncedEvent::Create(path) |
         DebouncedEvent::Write(path) |
         DebouncedEvent::Chmod(path) |
         DebouncedEvent::Remove(path) |
         DebouncedEvent::Rename(_, path) => { Some(path.as_ref()) }, // TODO use both paths from rename?
+        DebouncedEvent::NoticeWrite(_) | // NoticeWrite and NoticeRemove both create duplicate entries for our use case
+        DebouncedEvent::NoticeRemove(_) |
         DebouncedEvent::Rescan |
         DebouncedEvent::Error(_, _) => { None },
     }
