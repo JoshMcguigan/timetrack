@@ -2,7 +2,8 @@ extern crate clap;
 use clap::{App, Arg};
 
 extern crate timetrack;
-use timetrack::{track::track, calc::calc, clear::clear};
+use timetrack::{track::Tracker, calc::calc, clear::clear};
+use timetrack::config::get_config;
 
 fn main() {
     // todo add cli option to clear history
@@ -24,7 +25,10 @@ fn main() {
     }
 
     if matches.is_present("track") {
-        track();
+        let config = get_config();
+
+        Tracker::new(&config).track();
+
     } else {
         calc();
     }

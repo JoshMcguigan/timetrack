@@ -76,6 +76,8 @@ fn create_filesystem_noise(){
 #[test]
 //#[ignore] // WARNING: this test clears all timetrack history, TODO perhaps move the existing history file before testing then move it back?
 fn integration() {
+    // Ensure there are no instances of TimeTrack running while this test is running
+
     clear_and_verify();
 
     let mut tracker = tracker_proc(); // start watching file system
