@@ -42,15 +42,19 @@ impl<'a> Tracker<'a> {
     }
 
     fn get_project_name_from_path(&self, path: &Path) -> String {
-        path
-            .strip_prefix(PathBuf::from(self.config.track_paths.get(0).unwrap())) // TODO correct this for multiple path options
-            .expect("Path doesn't contain root path")
-            .components()
-            .next()
-            .expect("Path only contained root path")
-            .as_os_str()
-            .to_string_lossy()
-            .to_string()
+        for track_path in &self.config.track_paths {
+            if let Ok(path) = path.strip_prefix(track_path) {
+                return path
+                    .components()
+                    .next()
+                    .expect("Path only contained root path")
+                    .as_os_str()
+                    .to_string_lossy()
+                    .to_string()
+            };
+        }
+
+        panic!("Failed processing path which was not in configured track paths");
     }
 
     fn extract_project_name<T>(&self, path: T) -> Option<String>
@@ -113,6 +117,16 @@ mod tests {
     }
 
     #[test]
+    fn extract_project_name_multiple_paths() {
+        let config = get_mock_config();
+        let event_path = PathBuf::from(config.track_paths.get(1).unwrap().clone() + "/testOtherProj/file1.rs");
+
+        let tracker = Tracker::new(&config);
+
+        assert_eq!(Some("testOtherProj".to_string()), tracker.extract_project_name(event_path));
+    }
+
+    #[test]
     fn extract_project_name_none() {
         let config = get_mock_config();
         let event_path = PathBuf::from(config.raw_data_path.clone());
@@ -124,7 +138,10 @@ mod tests {
 
     fn get_mock_config() -> Configuration {
         Configuration {
-            track_paths: vec!["/Users/josh/Projects".to_string()],
+            track_paths: vec![
+                "/Users/josh/Projects".to_string(),
+                "/Users/josh/OtherProjects".to_string(),
+            ],
             raw_data_path: "/Users/josh/.timetrack_raw".to_string(),
         }
     }
