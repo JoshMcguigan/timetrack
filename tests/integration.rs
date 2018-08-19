@@ -9,6 +9,24 @@ use std::io::Write;
 extern crate timetrack;
 use timetrack::get_config;
 
+struct Backup;
+
+impl Backup {
+    fn new() -> Self {
+        let config = get_config();
+        fs::copy(&config.raw_data_path, (&config.raw_data_path).clone() + "__BACKUP").unwrap();
+
+        Backup
+    }
+}
+
+impl Drop for Backup {
+    fn drop(&mut self) {
+        let config = get_config();
+        fs::rename((&config.raw_data_path).clone()+"__BACKUP", &config.raw_data_path).unwrap();
+    }
+}
+
 fn tracker_proc() -> Child {
     Command::new("cargo")
         .arg("run")
@@ -74,9 +92,10 @@ fn create_filesystem_noise(){
 }
 
 #[test]
-#[ignore] // WARNING: this test clears all timetrack history, TODO perhaps move the existing history file before testing then move it back?
+#[ignore]
 fn integration() {
     // Ensure there are no instances of TimeTrack running while this test is running
+    let _backup = Backup::new(); // backup implements drop to ensure backup file is restored after test completes
 
     clear_and_verify();
 
