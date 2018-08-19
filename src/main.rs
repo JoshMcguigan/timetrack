@@ -2,7 +2,7 @@ extern crate clap;
 use clap::{App, Arg};
 
 extern crate timetrack;
-use timetrack::{track::Tracker, calc::calc, clear::clear};
+use timetrack::{track::Tracker, calc::Calc, clear::clear};
 use timetrack::config::get_config;
 
 fn main() {
@@ -24,12 +24,10 @@ fn main() {
         return; // clear should not run track/calc after
     }
 
+    let config = get_config();
     if matches.is_present("track") {
-        let config = get_config();
-
         Tracker::new(&config).track();
-
     } else {
-        calc();
+        Calc::new(&config).calc();
     }
 }

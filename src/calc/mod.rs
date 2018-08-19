@@ -1,21 +1,33 @@
 use std::collections::HashMap;
 use std::fs::OpenOptions;
-use RAW_DATA_FILE;
 use std::io::Read;
+use config::Configuration;
 
 const MAX_SECONDS_BETWEEN_RECORDS_IN_SPAN: u64 = 5 * 60;
 
-pub fn calc() {
-    let mut file = OpenOptions::new()
-        .read(true)
-        .write(true)
-        .open(RAW_DATA_FILE).unwrap();
+pub struct Calc<'a> {
+    config: &'a Configuration
+}
 
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)
-        .expect("something went wrong reading the file");
+impl<'a> Calc<'a> {
+    pub fn new(config: &'a Configuration) -> Self {
+        Calc {
+            config,
+        }
+    }
 
-    println!("{:?}", parse_raw_data(contents));
+    pub fn calc(&self) {
+        let mut file = OpenOptions::new()
+            .read(true)
+            .write(true)
+            .open(&self.config.raw_data_path).unwrap();
+
+        let mut contents = String::new();
+        file.read_to_string(&mut contents)
+            .expect("something went wrong reading the file");
+
+        println!("{:?}", parse_raw_data(contents));
+    }
 }
 
 #[derive(PartialEq, Debug)]
