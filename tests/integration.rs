@@ -47,7 +47,7 @@ fn clear_and_verify() {
 
     let output_text = String::from_utf8_lossy(output.stdout.as_ref());
 
-    assert!(output_text.contains("{}")); // ensure logs have been cleared
+    assert_eq!("No time track data found\n", output_text); // ensure logs have been cleared
 }
 
 fn create_filesystem_noise(){
@@ -74,7 +74,7 @@ fn create_filesystem_noise(){
 }
 
 #[test]
-//#[ignore] // WARNING: this test clears all timetrack history, TODO perhaps move the existing history file before testing then move it back?
+#[ignore] // WARNING: this test clears all timetrack history, TODO perhaps move the existing history file before testing then move it back?
 fn integration() {
     // Ensure there are no instances of TimeTrack running while this test is running
 

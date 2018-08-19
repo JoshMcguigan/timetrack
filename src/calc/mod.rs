@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::Read;
 use TimeTracker;
+use display::display;
 
 const MAX_SECONDS_BETWEEN_RECORDS_IN_SPAN: u64 = 5 * 60;
 
@@ -17,7 +18,7 @@ impl<'a> TimeTracker<'a> {
         file.read_to_string(&mut contents)
             .expect("something went wrong reading the file");
 
-        println!("{:?}", parse_raw_data(contents));
+        display(&parse_raw_data(contents));
     }
 
 }

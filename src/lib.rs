@@ -4,6 +4,7 @@ mod config;
 mod calc;
 mod track;
 mod clear;
+mod display;
 
 use config::Configuration;
 

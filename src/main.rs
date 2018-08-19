@@ -6,7 +6,6 @@ use timetrack::get_config;
 use timetrack::TimeTracker;
 
 fn main() {
-    // todo add cli option to clear history
     let matches = App::new("TimeTrack")
         .arg(Arg::with_name("track")
             .short("t")
