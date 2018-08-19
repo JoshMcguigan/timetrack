@@ -7,7 +7,7 @@ use std::fs::OpenOptions;
 use std::fs;
 use std::io::Write;
 extern crate timetrack;
-use timetrack::ROOT_PATH;
+use timetrack::config::get_config;
 
 fn tracker_proc() -> Child {
     Command::new("cargo")
@@ -51,7 +51,7 @@ fn clear_and_verify() {
 }
 
 fn create_filesystem_noise(){
-    let test_file_path = ROOT_PATH.to_owned() + "/timetrack/__integration_test__";
+    let test_file_path = get_config().track_paths.get(0).unwrap().to_owned() + "/timetrack/__integration_test__";
 
     {
         let mut file = OpenOptions::new()

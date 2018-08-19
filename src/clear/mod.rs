@@ -1,10 +1,12 @@
 use std::fs::OpenOptions;
-use RAW_DATA_FILE;
+use TimeTracker;
 
-pub fn clear() {
-    OpenOptions::new()
-        .write(true)
-        .truncate(true)
-        .create(true)
-        .open(RAW_DATA_FILE).unwrap();
+impl<'a> TimeTracker<'a> {
+    pub fn clear(&self) {
+        OpenOptions::new()
+            .write(true)
+            .truncate(true)
+            .create(true)
+            .open(&self.config.raw_data_path).unwrap();
+    }
 }

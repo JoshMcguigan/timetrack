@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::Read;
-use config::Configuration;
 use TimeTracker;
 
 const MAX_SECONDS_BETWEEN_RECORDS_IN_SPAN: u64 = 5 * 60;
@@ -107,7 +106,6 @@ fn calculate_project_total_time(spans: Vec<Span>) -> HashMap<String, u64> {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
 
     #[test]

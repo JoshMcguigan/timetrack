@@ -2,7 +2,6 @@ extern crate clap;
 use clap::{App, Arg};
 
 extern crate timetrack;
-use timetrack::{clear::clear};
 use timetrack::config::get_config;
 use timetrack::TimeTracker;
 
@@ -19,16 +18,15 @@ fn main() {
             .help("Clear all data"))
         .get_matches();
 
+    let config = get_config();
+    let time_tracker = TimeTracker::new(&config);
+
     if matches.is_present("clear") {
         // TODO don't unwrap inside the library calls, handle errors here and exit with appropriate error message and exit code
-        clear();
-        return; // clear should not run track/calc after
-    }
-
-    let config = get_config();
-    if matches.is_present("track") {
-        TimeTracker::new(&config).track();
+        time_tracker.clear();
+    } else if matches.is_present("track") {
+        time_tracker.track();
     } else {
-        TimeTracker::new(&config).calc();
+        time_tracker.calc();
     }
 }
