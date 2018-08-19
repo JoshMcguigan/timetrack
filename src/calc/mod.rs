@@ -2,19 +2,11 @@ use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::Read;
 use config::Configuration;
+use TimeTracker;
 
 const MAX_SECONDS_BETWEEN_RECORDS_IN_SPAN: u64 = 5 * 60;
 
-pub struct Calc<'a> {
-    config: &'a Configuration
-}
-
-impl<'a> Calc<'a> {
-    pub fn new(config: &'a Configuration) -> Self {
-        Calc {
-            config,
-        }
-    }
+impl<'a> TimeTracker<'a> {
 
     pub fn calc(&self) {
         let mut file = OpenOptions::new()
@@ -28,6 +20,7 @@ impl<'a> Calc<'a> {
 
         println!("{:?}", parse_raw_data(contents));
     }
+
 }
 
 #[derive(PartialEq, Debug)]

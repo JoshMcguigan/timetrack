@@ -1,4 +1,3 @@
-use config::Configuration;
 use notify::{DebouncedEvent, RecommendedWatcher, RecursiveMode, Watcher};
 use std::fs::OpenOptions;
 use std::io::Write;
@@ -7,16 +6,9 @@ use std::path::PathBuf;
 use std::sync::mpsc::channel;
 use std::time::Duration;
 use std::time::SystemTime;
+use TimeTracker;
 
-pub struct Tracker<'a> {
-    config: &'a Configuration
-}
-
-impl<'a> Tracker<'a> {
-    pub fn new(config: &'a Configuration) -> Self {
-        Tracker { config }
-    }
-
+impl<'a> TimeTracker<'a> {
     pub fn track(&self) {
         let (tx, rx) = channel();
 
@@ -105,13 +97,15 @@ fn get_path_from_event(event: &DebouncedEvent) -> Option<&Path> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use config::Configuration;
+
 
     #[test]
     fn extract_project_name_some() {
         let config = get_mock_config();
         let event_path = PathBuf::from(config.track_paths.get(0).unwrap().clone() + "/testProj/file1.rs");
 
-        let tracker = Tracker::new(&config);
+        let tracker = TimeTracker::new(&config);
 
         assert_eq!(Some("testProj".to_string()), tracker.extract_project_name(event_path));
     }
@@ -121,7 +115,7 @@ mod tests {
         let config = get_mock_config();
         let event_path = PathBuf::from(config.track_paths.get(1).unwrap().clone() + "/testOtherProj/file1.rs");
 
-        let tracker = Tracker::new(&config);
+        let tracker = TimeTracker::new(&config);
 
         assert_eq!(Some("testOtherProj".to_string()), tracker.extract_project_name(event_path));
     }
@@ -131,7 +125,7 @@ mod tests {
         let config = get_mock_config();
         let event_path = PathBuf::from(config.raw_data_path.clone());
 
-        let tracker = Tracker::new(&config);
+        let tracker = TimeTracker::new(&config);
 
         assert_eq!(None, tracker.extract_project_name(event_path));
     }
