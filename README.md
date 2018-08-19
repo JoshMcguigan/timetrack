@@ -10,13 +10,13 @@ TimeTrack is currently in the very early stages of development.
 
 ```bash
     # to start time tracking
-    cargo run -- --track
+    cargo run -- track
     
     # to see the results
     cargo run
     
     # to clear the tracking history
-    cargo run -- --clear
+    cargo run -- clear
 ```
 
 ## License

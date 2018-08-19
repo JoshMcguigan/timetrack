@@ -31,7 +31,7 @@ fn tracker_proc() -> Child {
     Command::new("cargo")
         .arg("run")
         .arg("--")
-        .arg("--track")
+        .arg("track")
         .spawn()
         .expect("failed to execute child")
 }
@@ -40,7 +40,7 @@ fn clear_proc() -> Child {
     Command::new("cargo")
         .arg("run")
         .arg("--")
-        .arg("--clear")
+        .arg("clear")
         .spawn()
         .expect("failed to execute child")
 }
