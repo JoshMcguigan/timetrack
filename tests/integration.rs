@@ -7,7 +7,7 @@ use std::fs::OpenOptions;
 use std::fs;
 use std::io::Write;
 extern crate timetrack;
-use timetrack::config::get_config;
+use timetrack::get_config;
 
 fn tracker_proc() -> Child {
     Command::new("cargo")

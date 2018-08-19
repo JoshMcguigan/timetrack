@@ -2,7 +2,7 @@ extern crate clap;
 use clap::{App, Arg};
 
 extern crate timetrack;
-use timetrack::config::get_config;
+use timetrack::get_config;
 use timetrack::TimeTracker;
 
 fn main() {

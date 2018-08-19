@@ -1,11 +1,13 @@
 extern crate notify;
 
+mod config;
+mod calc;
+mod track;
+mod clear;
+
 use config::Configuration;
 
-pub mod config;
-pub mod calc;
-pub mod track;
-pub mod clear;
+pub use config::get_config;
 
 pub struct TimeTracker<'a> {
     config: &'a Configuration
