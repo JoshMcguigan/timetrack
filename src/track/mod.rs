@@ -103,7 +103,7 @@ mod tests {
     #[test]
     fn extract_project_name_some() {
         let config = get_mock_config();
-        let event_path = PathBuf::from(config.track_paths.get(0).unwrap().clone() + "/testProj/file1.rs");
+        let event_path = PathBuf::from(config.track_paths.get(0).unwrap().clone().join("testProj/file1.rs"));
 
         let tracker = TimeTracker::new(&config);
 
@@ -113,7 +113,7 @@ mod tests {
     #[test]
     fn extract_project_name_multiple_paths() {
         let config = get_mock_config();
-        let event_path = PathBuf::from(config.track_paths.get(1).unwrap().clone() + "/testOtherProj/file1.rs");
+        let event_path = PathBuf::from(config.track_paths.get(1).unwrap().clone().join("testOtherProj/file1.rs"));
 
         let tracker = TimeTracker::new(&config);
 
@@ -133,10 +133,10 @@ mod tests {
     fn get_mock_config() -> Configuration {
         Configuration {
             track_paths: vec![
-                "/Users/josh/Projects".to_string(),
-                "/Users/josh/OtherProjects".to_string(),
+                PathBuf::from("/Users/josh/Projects"),
+                PathBuf::from("/Users/josh/OtherProjects"),
             ],
-            raw_data_path: "/Users/josh/.timetrack_raw".to_string(),
+            raw_data_path: PathBuf::from("/Users/josh/.timetrack_raw"),
         }
     }
 }

@@ -6,3 +6,4 @@ authors = ["Josh Mcguigan"]
 [dependencies]
 notify="4.0.0"
 clap="2.32.0"
+directories = "1.0.1"

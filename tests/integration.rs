@@ -14,7 +14,7 @@ struct Backup;
 impl Backup {
     fn new() -> Self {
         let config = get_config();
-        fs::copy(&config.raw_data_path, (&config.raw_data_path).clone() + "__BACKUP").unwrap();
+        fs::copy(&config.raw_data_path, (&config.raw_data_path).clone().with_extension("bak")).unwrap();
 
         Backup
     }
@@ -23,7 +23,7 @@ impl Backup {
 impl Drop for Backup {
     fn drop(&mut self) {
         let config = get_config();
-        fs::rename((&config.raw_data_path).clone()+"__BACKUP", &config.raw_data_path).unwrap();
+        fs::rename((&config.raw_data_path).clone().with_extension("bak"), &config.raw_data_path).unwrap();
     }
 }
 
@@ -69,7 +69,7 @@ fn clear_and_verify() {
 }
 
 fn create_filesystem_noise(){
-    let test_file_path = get_config().track_paths.get(0).unwrap().to_owned() + "/timetrack/__integration_test__";
+    let test_file_path = get_config().track_paths.get(0).unwrap().to_owned().join("timetrack/__integration_test__");
 
     {
         let mut file = OpenOptions::new()

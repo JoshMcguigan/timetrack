@@ -1,4 +1,5 @@
 extern crate notify;
+extern crate directories;
 
 mod config;
 mod calc;

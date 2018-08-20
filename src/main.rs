@@ -1,6 +1,5 @@
-#[macro_use]
 extern crate clap;
-use clap::{App, Arg};
+use clap::App;
 
 extern crate timetrack;
 use timetrack::get_config;
