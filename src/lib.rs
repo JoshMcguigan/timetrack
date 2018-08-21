@@ -1,5 +1,7 @@
 extern crate notify;
 extern crate directories;
+extern crate toml;
+#[macro_use] extern crate serde_derive;
 
 mod config;
 mod calc;

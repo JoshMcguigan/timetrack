@@ -4,6 +4,9 @@ version = "0.1.0"
 authors = ["Josh Mcguigan"]
 
 [dependencies]
-notify="4.0.0"
-clap="2.32.0"
-directories = "1.0.1"
+notify="4.0"
+clap="2.32"
+directories = "1.0"
+toml = "0.4"
+serde = "1.0"
+serde_derive = "1.0"

@@ -10,6 +10,7 @@ fn main() {
     let matches = App::new("TimeTrack")
         .subcommand(SubCommand::with_name("track"))
         .subcommand(SubCommand::with_name("clear"))
+        .subcommand(SubCommand::with_name("config"))
         .get_matches();
 
     let config = get_config();
@@ -20,6 +21,8 @@ fn main() {
         time_tracker.clear();
     } else if matches.subcommand_matches("track").is_some() {
         time_tracker.track();
+    } else if matches.subcommand_matches("config").is_some() {
+        time_tracker.print_config();
     } else {
         time_tracker.calc();
     }
