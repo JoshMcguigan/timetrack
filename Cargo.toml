@@ -2,6 +2,11 @@
 name = "timetrack"
 version = "0.1.0"
 authors = ["Josh Mcguigan"]
+description = "Automatically track how you are spending your time by watching the file system"
+repository = "https://github.com/JoshMcguigan/timetrack"
+readme = "README.md"
+keywords = ["freelance", "time", "track", "productivity", "cli"]
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 notify="4.0"
