@@ -50,7 +50,7 @@ pub fn get_config() -> Configuration {
 
 impl<'a> TimeTracker<'a> {
     pub fn print_config(&self) {
-        // TODO also print config file path
+        // TODO also print config file path and update docs to describe how to configure timetrack
         println!("{}", self.config);
     }
 }

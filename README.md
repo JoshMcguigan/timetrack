@@ -1,22 +1,29 @@
-# TimeTrack
+# TimeTrack [![Build Status](https://api.travis-ci.org/JoshMcguigan/timetrack.svg?branch=master)](https://travis-ci.org/JoshMcguigan/timetrack)
 
 TimeTrack watches the file system to automatically track how much time you are spending on each of your projects. 
 
-## Status
+## Setup
 
-TimeTrack is currently in the very early stages of development. 
+TimeTrack requires Rust in order to build/install. If you need to install Rust, follow [these instructions](https://www.rust-lang.org/en-US/install.html). Once you have Rust installed, TimeTrack can be installed by running the command below:
+
+```
+cargo install traffic
+```
 
 ## Use
 
 ```bash
     # to start time tracking
-    cargo run -- track
+    timetrack track
     
     # to see the results
-    cargo run
+    timetrack
     
     # to clear the tracking history
-    cargo run -- clear
+    timetrack clear
+    
+    # to view the configuration
+    timetrack config
 ```
 
 ## License
