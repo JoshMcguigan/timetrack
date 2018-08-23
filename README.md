@@ -7,7 +7,7 @@ TimeTrack watches the file system to automatically track how much time you are s
 TimeTrack requires Rust in order to build/install. If you need to install Rust, follow [these instructions](https://www.rust-lang.org/en-US/install.html). Once you have Rust installed, TimeTrack can be installed by running the command below:
 
 ```
-cargo install traffic
+cargo install timetrack
 ```
 
 ## Use
