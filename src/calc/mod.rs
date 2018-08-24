@@ -3,12 +3,16 @@ use std::fs::OpenOptions;
 use std::io::Read;
 use TimeTracker;
 use display::display;
+mod raw_log;
+use self::raw_log::{RawLog, raw_logs_from};
 
 const MAX_SECONDS_BETWEEN_RECORDS_IN_SPAN: u64 = 5 * 60;
 
 impl<'a> TimeTracker<'a> {
 
     pub fn calc(&self) {
+        // TODO calc should clear raw data file and save only the spans to a processed file
+
         let mut file = OpenOptions::new()
             .read(true)
             .write(true)
@@ -21,12 +25,6 @@ impl<'a> TimeTracker<'a> {
         display(&parse_raw_data(contents));
     }
 
-}
-
-#[derive(PartialEq, Debug)]
-struct RawLog {
-    name: String,
-    timestamp: u64,
 }
 
 struct Span {
@@ -43,24 +41,6 @@ impl Span {
 
 pub fn parse_raw_data(raw_data: String) -> HashMap<String, u64> {
     calculate_project_total_time(get_spans_from(raw_logs_from(raw_data)))
-}
-
-fn raw_logs_from(raw_data: String) -> Vec<RawLog> {
-    let mut raw_logs = vec![];
-
-    for line in raw_data.lines() {
-        raw_logs.push(RawLog::from(line));
-    }
-
-    raw_logs
-}
-
-impl<'a> From<&'a str> for RawLog {
-    fn from(raw_data: &'a str) -> Self {
-        // TODO convert this to try_from
-        let mut parts = raw_data.split("/");
-        RawLog { name: parts.next().unwrap().to_string(), timestamp: parts.next().unwrap().parse::<u64>().unwrap() }
-    }
 }
 
 fn get_spans_from(mut raw_logs: Vec<RawLog>) -> Vec<Span> {
@@ -206,21 +186,5 @@ mod tests {
         assert_eq!(19u64, *project_totals.get(proj_1_name).unwrap());
         assert!(project_totals.contains_key(proj_2_name));
         assert_eq!(5u64, *project_totals.get(proj_2_name).unwrap());
-    }
-
-    #[test]
-    fn raw_logs_from_string() {
-        let raw_data = "testproj1/123\ntestproj2/456\n";
-
-        let raw_logs = raw_logs_from(String::from(raw_data));
-
-        assert_eq!(2, raw_logs.len());
-
-    }
-
-    #[test]
-    fn raw_log_from_str() {
-        let raw_data = "josh/123";
-        assert_eq!(RawLog {name: String::from("josh"), timestamp: 123u64 }, RawLog::from(raw_data));
     }
 }
