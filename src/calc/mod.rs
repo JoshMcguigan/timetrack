@@ -2,11 +2,15 @@ use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::Read;
 use TimeTracker;
-use display::display;
-mod raw_log;
-use self::raw_log::{RawLog, raw_logs_from};
 
-const MAX_SECONDS_BETWEEN_RECORDS_IN_SPAN: u64 = 5 * 60;
+mod raw_log;
+use self::raw_log::{raw_logs_from};
+
+mod span;
+use self::span::{Span, get_spans_from};
+
+mod display;
+use self::display::display;
 
 impl<'a> TimeTracker<'a> {
 
@@ -27,44 +31,8 @@ impl<'a> TimeTracker<'a> {
 
 }
 
-struct Span {
-    name: String,
-    start: u64,
-    end: u64,
-}
-
-impl Span {
-    fn duration(&self) -> u64 {
-        self.end-self.start
-    }
-}
-
 pub fn parse_raw_data(raw_data: String) -> HashMap<String, u64> {
     calculate_project_total_time(get_spans_from(raw_logs_from(raw_data)))
-}
-
-fn get_spans_from(mut raw_logs: Vec<RawLog>) -> Vec<Span> {
-    if raw_logs.len() == 0 { return vec![] }
-
-    let mut spans = vec![];
-
-    let first_log = raw_logs.remove(0);
-
-    let mut span = Span {name: String::from(first_log.name), start: first_log.timestamp, end: first_log.timestamp};
-    for log in raw_logs {
-        let same_name = log.name == span.name;
-        let small_time_gap = log.timestamp - span.end < MAX_SECONDS_BETWEEN_RECORDS_IN_SPAN;
-        let new_log_is_part_of_existing_span = same_name && small_time_gap;
-
-        if new_log_is_part_of_existing_span  {
-            span.end = log.timestamp;
-        } else {
-            spans.push(span);
-            span = Span {name: String::from(log.name), start: log.timestamp, end: log.timestamp};
-        }
-    }
-    spans.push(span);
-    spans
 }
 
 fn calculate_project_total_time(spans: Vec<Span>) -> HashMap<String, u64> {
@@ -88,6 +56,7 @@ fn calculate_project_total_time(spans: Vec<Span>) -> HashMap<String, u64> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use self::raw_log::RawLog;
 
     #[test]
     fn raw_log_to_span_no_logs() {
