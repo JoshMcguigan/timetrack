@@ -17,6 +17,16 @@ impl<'a> TimeTracker<'a> {
     pub fn calc(&self) {
         // TODO calc should clear raw data file and save only the spans to a processed file
 
+        // rename raw data file to mark it as being processed
+
+        // process data into spans
+
+        // append spans to processed data file
+
+        // write last timestamp for each project to the beginning of the raw data file (creating if necessary)
+
+        // delete the being processed data file
+
         let mut file = OpenOptions::new()
             .read(true)
             .write(true)

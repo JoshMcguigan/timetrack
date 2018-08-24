@@ -1,4 +1,5 @@
 use calc::raw_log::RawLog;
+use std::collections::HashMap;
 
 const MAX_SECONDS_BETWEEN_RECORDS_IN_SPAN: u64 = 5 * 60;
 
@@ -36,6 +37,26 @@ pub fn get_spans_from(mut raw_logs: Vec<RawLog>) -> Vec<Span> {
     }
     spans.push(span);
     spans
+}
+
+pub fn get_last_timestamp_per_project(spans: &Vec<Span>) -> HashMap<String,u64> {
+    let mut map = HashMap::new();
+
+    for span in spans {
+        // TODO is there a more efficient way to do this?
+        match map.remove(&span.name) {
+            None => { map.insert(span.name.clone(), span.end); },
+            Some(map_time) => {
+                if map_time < span.end {
+                    map.insert(span.name.clone(), span.end);
+                } else {
+                    map.insert(span.name.clone(), map_time);
+                }
+            },
+        }
+    }
+
+    map
 }
 
 #[cfg(test)]
@@ -109,5 +130,41 @@ mod tests {
         let span_2 = spans.remove(0);
         assert_eq!(project_name, span_2.name);
         assert_eq!(6, span_2.duration());
+    }
+
+    #[test]
+    fn get_last_timestamp_per_project_no_spans() {
+        let spans = vec![];
+        let last_timestamp_per_project = get_last_timestamp_per_project(&spans);
+
+        assert!(last_timestamp_per_project.is_empty());
+    }
+
+    #[test]
+    fn get_last_timestamp_per_project_several_spans() {
+        let mut spans = vec![];
+        let span1a = Span {
+            name: String::from("testproj1"),
+            start: 0,
+            end: 1,
+        };
+        let span1b = Span {
+            name: String::from("testproj1"),
+            start: 0,
+            end: 2,
+        };
+        let span2a = Span {
+            name: String::from("testproj2"),
+            start: 0,
+            end: 1,
+        };
+
+        spans.push(span1a);
+        spans.push(span1b);
+        spans.push(span2a);
+
+        let last_timestamp_per_project = get_last_timestamp_per_project(&spans);
+
+        assert_eq!(&2u64, last_timestamp_per_project.get("testproj1").expect("testproj1 not found"));
     }
 }
