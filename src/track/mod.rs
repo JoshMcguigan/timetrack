@@ -137,6 +137,7 @@ mod tests {
                 PathBuf::from("/Users/josh/OtherProjects"),
             ],
             raw_data_path: PathBuf::from("/Users/josh/.timetrack_raw"),
+            processed_data_path: PathBuf::from("/Users/josh/.timetrack_processed"),
         }
     }
 }

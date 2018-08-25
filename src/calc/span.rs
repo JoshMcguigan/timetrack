@@ -1,5 +1,9 @@
 use calc::raw_log::RawLog;
 use std::collections::HashMap;
+use std::fmt::Display;
+use std::fmt::Formatter;
+use std::fmt;
+use std::cmp::max;
 
 const MAX_SECONDS_BETWEEN_RECORDS_IN_SPAN: u64 = 5 * 60;
 
@@ -15,6 +19,37 @@ impl Span {
     }
 }
 
+impl Display for Span {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(f, "{}/{}/{}",
+               self.name,
+               self.start,
+               self.end,
+        )
+    }
+}
+
+pub fn spans_from(processed_data: String) -> Vec<Span> {
+    let mut spans = vec![];
+
+    for line in processed_data.lines() {
+        spans.push(Span::from(line));
+    }
+
+    spans
+}
+
+impl<'a> From<&'a str> for Span {
+    fn from(raw_data: &'a str) -> Self {
+        let mut parts = raw_data.split("/");
+        Span {
+            name: parts.next().unwrap().to_string(),
+            start: parts.next().unwrap().parse::<u64>().unwrap(),
+            end: parts.next().unwrap().parse::<u64>().unwrap(),
+        }
+    }
+}
+
 pub fn get_spans_from(mut raw_logs: Vec<RawLog>) -> Vec<Span> {
     if raw_logs.len() == 0 { return vec![] }
 
@@ -25,11 +60,11 @@ pub fn get_spans_from(mut raw_logs: Vec<RawLog>) -> Vec<Span> {
     let mut span = Span {name: String::from(first_log.name), start: first_log.timestamp, end: first_log.timestamp};
     for log in raw_logs {
         let same_name = log.name == span.name;
-        let small_time_gap = log.timestamp - span.end < MAX_SECONDS_BETWEEN_RECORDS_IN_SPAN;
+        let small_time_gap = log.timestamp.saturating_sub(span.end) < MAX_SECONDS_BETWEEN_RECORDS_IN_SPAN;
         let new_log_is_part_of_existing_span = same_name && small_time_gap;
 
         if new_log_is_part_of_existing_span  {
-            span.end = log.timestamp;
+            span.end = max(log.timestamp, span.end);
         } else {
             spans.push(span);
             span = Span {name: String::from(log.name), start: log.timestamp, end: log.timestamp};

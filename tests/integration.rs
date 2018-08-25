@@ -15,6 +15,7 @@ impl Backup {
     fn new() -> Self {
         let config = get_config();
         fs::copy(&config.raw_data_path, (&config.raw_data_path).clone().with_extension("bak")).unwrap();
+        fs::copy(&config.processed_data_path, (&config.processed_data_path).clone().with_extension("bak")).unwrap();
 
         Backup
     }
@@ -24,6 +25,7 @@ impl Drop for Backup {
     fn drop(&mut self) {
         let config = get_config();
         fs::rename((&config.raw_data_path).clone().with_extension("bak"), &config.raw_data_path).unwrap();
+        fs::rename((&config.processed_data_path).clone().with_extension("bak"), &config.processed_data_path).unwrap();
     }
 }
 

@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::Read;
+use std::io::Write;
 use TimeTracker;
 
 mod raw_log;
@@ -11,38 +12,72 @@ use self::span::{Span, get_spans_from};
 
 mod display;
 use self::display::display;
+use self::span::get_last_timestamp_per_project;
+use calc::raw_log::RawLog;
+use calc::span::spans_from;
 
 impl<'a> TimeTracker<'a> {
 
     pub fn calc(&self) {
-        // TODO calc should clear raw data file and save only the spans to a processed file
-
-        // rename raw data file to mark it as being processed
-
-        // process data into spans
+        // process raw data into spans
+        let mut raw_data = String::new();
+        {
+            let mut raw_data_file = OpenOptions::new()
+                .read(true)
+                .open(&self.config.raw_data_path).unwrap();
+            raw_data_file.read_to_string(&mut raw_data)
+                .expect("something went wrong reading the file");
+        }
+        let new_spans = get_spans_from(raw_logs_from(raw_data));
 
         // append spans to processed data file
+        {
+            let mut processed_data_file = OpenOptions::new()
+                .read(true)
+                .write(true)
+                .create(true)
+                .append(true)
+                .open(&self.config.processed_data_path).unwrap();
 
-        // write last timestamp for each project to the beginning of the raw data file (creating if necessary)
+            for span in &new_spans {
+                writeln!(&mut processed_data_file, "{}", span);
+            }
+        }
 
-        // delete the being processed data file
+        // overwrite raw data file with last timestamp for each project (note this could cause small amount of data loss)
+        let last_timestamp_per_project = get_last_timestamp_per_project(&new_spans);
+        let mut updated_raw_log = String::new();
+        {
+            use std::fmt::Write;
+            for (project_name, timestamp) in last_timestamp_per_project.into_iter() {
+                let raw_log = RawLog {
+                    name: project_name,
+                    timestamp,
+                };
+                writeln!(&mut updated_raw_log, "{}", raw_log);
+            }
+        }
+        {
+            let mut raw_data_file = OpenOptions::new()
+                .read(true)
+                .write(true)
+                .truncate(true)
+                .open(&self.config.raw_data_path).unwrap();
+            write!(&mut raw_data_file, "{}", updated_raw_log);
+        }
 
-        let mut file = OpenOptions::new()
+        // process spans from processed file as normal
+        let mut processed_data_file = OpenOptions::new()
             .read(true)
-            .write(true)
-            .open(&self.config.raw_data_path).unwrap();
+            .open(&self.config.processed_data_path).unwrap();
+        let mut all_spans_string = String::new();
+        processed_data_file.read_to_string(&mut all_spans_string)
+            .expect("Failed to read processed data");
+        let all_spans = spans_from(all_spans_string);
 
-        let mut contents = String::new();
-        file.read_to_string(&mut contents)
-            .expect("something went wrong reading the file");
-
-        display(&parse_raw_data(contents));
+        display(&calculate_project_total_time(all_spans));
     }
 
-}
-
-pub fn parse_raw_data(raw_data: String) -> HashMap<String, u64> {
-    calculate_project_total_time(get_spans_from(raw_logs_from(raw_data)))
 }
 
 fn calculate_project_total_time(spans: Vec<Span>) -> HashMap<String, u64> {

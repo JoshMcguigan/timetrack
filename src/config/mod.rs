@@ -14,14 +14,16 @@ use std::fmt::Formatter;
 
 pub struct Configuration {
     pub track_paths: Vec<PathBuf>,
-    pub raw_data_path: PathBuf
+    pub raw_data_path: PathBuf,
+    pub processed_data_path: PathBuf,
 }
 
 impl Display for Configuration {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "TimeTrack Configuration\nTracking paths: {:?}\nRaw data path: {:?}",
+        write!(f, "TimeTrack Configuration\nTracking paths: {:?}\nRaw data path: {:?}\nProcessed data path: {:?}",
             self.track_paths,
             self.raw_data_path,
+            self.processed_data_path
         )
     }
 }
@@ -38,13 +40,15 @@ pub fn get_config() -> Configuration {
         "timetrack"
     ).expect("Failed to read project directories");
 
-    let raw_data_path = get_raw_data_file_path(&project_dir);
+    let raw_data_path = get_data_file_path(&project_dir, ".timetrack_raw");
+    let processed_data_path = get_data_file_path(&project_dir, ".timetrack_processed");
     let user_config = get_user_config(&project_dir);
 
     Configuration {
         // TODO how to handle two track paths where one is a subdirectory of another
         track_paths: user_config.track_paths,
         raw_data_path,
+        processed_data_path,
     }
 }
 
@@ -55,20 +59,20 @@ impl<'a> TimeTracker<'a> {
     }
 }
 
-fn get_raw_data_file_path(project_dirs: &ProjectDirs) -> PathBuf {
-    let raw_data_directory = project_dirs.data_local_dir();
-    let raw_data_file_path = raw_data_directory.join(".timetrack_raw");
+fn get_data_file_path(project_dirs: &ProjectDirs, filename: &str) -> PathBuf {
+    let data_directory = project_dirs.data_local_dir();
+    let data_file_path = data_directory.join(filename);
 
-    fs::create_dir_all(&raw_data_directory)
-        .expect("Failed to create raw data directory");
+    fs::create_dir_all(&data_directory)
+        .expect("Failed to create data directory");
     OpenOptions::new()
         .create(true)
         .read(true)
         .write(true)
-        .open(&raw_data_file_path)
-        .expect("Failed to create raw data file");
+        .open(&data_file_path)
+        .expect("Failed to create data file");
 
-    raw_data_file_path
+    data_file_path
 }
 
 fn get_user_config(project_dirs: &ProjectDirs) -> UserConfig {
