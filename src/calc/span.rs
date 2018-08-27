@@ -62,22 +62,20 @@ pub fn get_spans_from(mut raw_logs: Vec<RawLog>) -> Vec<Span> {
     for log in raw_logs {
         let same_name = log.name == span.name;
         let small_time_gap = log.timestamp.saturating_sub(span.end) < MAX_SECONDS_BETWEEN_RECORDS_IN_SPAN;
-        let new_log_is_part_of_existing_span = same_name && small_time_gap;
 
-        if new_log_is_part_of_existing_span  {
-            span.end = max(log.timestamp, span.end);
-        } else {
-            if small_time_gap {
+        match (same_name, small_time_gap) {
+            (true, true) => span.end = max(log.timestamp, span.end),
+            (false, true) => {
                 let mid_point_time = (max(log.timestamp, span.end) - min(log.timestamp, span.end)) / 2 + min(log.timestamp, span.end);
                 span.end = mid_point_time;
                 spans.push(span);
                 span = Span {name: String::from(log.name), start: mid_point_time, end: log.timestamp};
-            } else {
+            },
+            (_, false) => {
                 spans.push(span);
                 span = Span {name: String::from(log.name), start: log.timestamp, end: log.timestamp};
             }
-
-        }
+        };
     }
     spans.push(span);
     spans
