@@ -4,6 +4,7 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt;
 use std::cmp::max;
+use std::cmp::min;
 
 const MAX_SECONDS_BETWEEN_RECORDS_IN_SPAN: u64 = 5 * 60;
 
@@ -66,8 +67,16 @@ pub fn get_spans_from(mut raw_logs: Vec<RawLog>) -> Vec<Span> {
         if new_log_is_part_of_existing_span  {
             span.end = max(log.timestamp, span.end);
         } else {
-            spans.push(span);
-            span = Span {name: String::from(log.name), start: log.timestamp, end: log.timestamp};
+            if small_time_gap {
+                let mid_point_time = (max(log.timestamp, span.end) - min(log.timestamp, span.end)) / 2 + min(log.timestamp, span.end);
+                span.end = mid_point_time;
+                spans.push(span);
+                span = Span {name: String::from(log.name), start: mid_point_time, end: log.timestamp};
+            } else {
+                spans.push(span);
+                span = Span {name: String::from(log.name), start: log.timestamp, end: log.timestamp};
+            }
+
         }
     }
     spans.push(span);
@@ -127,8 +136,8 @@ mod tests {
         let project_name = "test_proj";
         let project_2_name = "test_proj2";
         let raw_log_1 = RawLog { name: String::from(project_name), timestamp: 0 };
-        let raw_log_2 = RawLog { name: String::from(project_name), timestamp: 5 };
-        let raw_log_3 = RawLog { name: String::from(project_2_name), timestamp: 20 };
+        let raw_log_2 = RawLog { name: String::from(project_name), timestamp: 6 };
+        let raw_log_3 = RawLog { name: String::from(project_2_name), timestamp: 18 };
         let raw_log_4 = RawLog { name: String::from(project_2_name), timestamp: 26 };
         let raw_logs = vec![raw_log_1, raw_log_2, raw_log_3, raw_log_4];
 
@@ -138,11 +147,43 @@ mod tests {
 
         let span_1 = spans.remove(0);
         assert_eq!(project_name, span_1.name);
-        assert_eq!(5, span_1.duration());
+        assert_eq!(6 + 6, span_1.duration()); // time between project timestamps is split equally between projects
 
         let span_2 = spans.remove(0);
         assert_eq!(project_2_name, span_2.name);
-        assert_eq!(6, span_2.duration());
+        assert_eq!(8 + 6, span_2.duration());
+    }
+
+
+    #[test]
+    fn raw_log_to_span_two_projects_interleaved() {
+        let project_1_name = "test_proj";
+        let project_2_name = "test_proj2";
+        let raw_log_1 = RawLog { name: String::from(project_1_name), timestamp: 0 };
+        let raw_log_2 = RawLog { name: String::from(project_1_name), timestamp: 5 };
+        let raw_log_3 = RawLog { name: String::from(project_2_name), timestamp: 20 };
+        let raw_log_4 = RawLog { name: String::from(project_2_name), timestamp: 24 };
+        let raw_log_5 = RawLog { name: String::from(project_1_name), timestamp: 30 };
+        let raw_log_6 = RawLog { name: String::from(project_1_name), timestamp: 36 };
+        let raw_logs = vec![raw_log_1, raw_log_2, raw_log_3, raw_log_4, raw_log_5, raw_log_6];
+
+        let mut spans = get_spans_from(raw_logs);
+
+        assert_eq!(3, spans.len());
+
+        let span_1 = spans.remove(0);
+        assert_eq!(project_1_name, span_1.name);
+        assert_eq!(12, span_1.duration());
+
+        let span_2 = spans.remove(0);
+        assert_eq!(project_2_name, span_2.name);
+        assert_eq!(15, span_2.duration());
+
+        let span_3 = spans.remove(0);
+        assert_eq!(project_1_name, span_3.name);
+        assert_eq!(9, span_3.duration());
+
+        assert_eq!(36, span_1.duration() + span_2.duration() + span_3.duration());
     }
 
     #[test]
