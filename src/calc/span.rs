@@ -5,6 +5,7 @@ use std::fmt::Formatter;
 use std::fmt;
 use std::cmp::max;
 use std::cmp::min;
+use std::iter::Map;
 
 const MAX_SECONDS_BETWEEN_RECORDS_IN_SPAN: u64 = 5 * 60;
 
@@ -99,6 +100,21 @@ pub fn get_last_timestamp_per_project(spans: &Vec<Span>) -> HashMap<String,u64> 
     }
 
     map
+}
+
+pub fn get_vec_raw_logs_from_map_last_timestamp_per_project(map: HashMap<String, u64>) -> Vec<RawLog> {
+    let mut raw_logs = vec![];
+    for (project_name, timestamp) in map.into_iter() {
+        let raw_log = RawLog {
+            name: project_name,
+            timestamp,
+        };
+        raw_logs.push(raw_log);
+    }
+
+    raw_logs.sort_by(|a,b| a.timestamp.cmp(&b.timestamp) );
+
+    raw_logs
 }
 
 #[cfg(test)]
@@ -220,17 +236,17 @@ mod tests {
         let span1a = Span {
             name: String::from("testproj1"),
             start: 0,
-            end: 1,
+            end: 30,
         };
         let span1b = Span {
             name: String::from("testproj1"),
-            start: 0,
-            end: 2,
+            start: 10030,
+            end: 10060,
         };
         let span2a = Span {
             name: String::from("testproj2"),
-            start: 0,
-            end: 1,
+            start: 530,
+            end: 560,
         };
 
         spans.push(span1a);
@@ -239,6 +255,26 @@ mod tests {
 
         let last_timestamp_per_project = get_last_timestamp_per_project(&spans);
 
-        assert_eq!(&2u64, last_timestamp_per_project.get("testproj1").expect("testproj1 not found"));
+        assert_eq!(&10060u64, last_timestamp_per_project.get("testproj1").expect("testproj1 not found"));
+    }
+
+    #[test]
+    fn get_vec_raw_logs_from_map_last_timestamp_per_project_empty() {
+        let last_timestamp_per_project = HashMap::new();
+
+        assert_eq!(0, get_vec_raw_logs_from_map_last_timestamp_per_project(last_timestamp_per_project).len());
+    }
+
+    #[test]
+    fn get_vec_raw_logs_from_map_last_timestamp_per_project_several_projects() {
+        let mut last_timestamp_per_project = HashMap::new();
+        last_timestamp_per_project.insert(String::from("proj1"), 1);
+        last_timestamp_per_project.insert(String::from("proj2"), 2);
+        last_timestamp_per_project.insert(String::from("proj3"), 3);
+
+        let last_timestamp_as_vec = get_vec_raw_logs_from_map_last_timestamp_per_project(last_timestamp_per_project);
+
+        assert_eq!(3, last_timestamp_as_vec.len());
+        assert_eq!(1, last_timestamp_as_vec.get(0).unwrap().timestamp);
     }
 }

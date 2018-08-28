@@ -15,6 +15,7 @@ use self::display::display;
 use self::span::get_last_timestamp_per_project;
 use calc::raw_log::RawLog;
 use calc::span::spans_from;
+use calc::span::get_vec_raw_logs_from_map_last_timestamp_per_project;
 
 impl<'a> TimeTracker<'a> {
 
@@ -45,15 +46,11 @@ impl<'a> TimeTracker<'a> {
         }
 
         // overwrite raw data file with last timestamp for each project (note this could cause small amount of data loss)
-        let last_timestamp_per_project = get_last_timestamp_per_project(&new_spans);
+        let last_timestamp_per_project = get_vec_raw_logs_from_map_last_timestamp_per_project(get_last_timestamp_per_project(&new_spans));
         let mut updated_raw_log = String::new();
         {
             use std::fmt::Write;
-            for (project_name, timestamp) in last_timestamp_per_project.into_iter() {
-                let raw_log = RawLog {
-                    name: project_name,
-                    timestamp,
-                };
+            for raw_log in last_timestamp_per_project {
                 writeln!(&mut updated_raw_log, "{}", raw_log);
             }
         }
