@@ -13,7 +13,6 @@ use self::span::{Span, get_spans_from};
 mod display;
 use self::display::display;
 use self::span::get_last_timestamp_per_project;
-use calc::raw_log::RawLog;
 use calc::span::spans_from;
 use calc::span::get_vec_raw_logs_from_map_last_timestamp_per_project;
 

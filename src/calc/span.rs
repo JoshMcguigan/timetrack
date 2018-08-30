@@ -5,7 +5,6 @@ use std::fmt::Formatter;
 use std::fmt;
 use std::cmp::max;
 use std::cmp::min;
-use std::iter::Map;
 
 const MAX_SECONDS_BETWEEN_RECORDS_IN_SPAN: u64 = 5 * 60;
 
