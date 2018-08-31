@@ -31,9 +31,10 @@ fn main() {
         5 | _ => LevelFilter::Trace,
     };
 
-    // TODO modify the formatting to only show local time (not date and time in UTC)
     env_logger::Builder::new()
         .filter_level(log_level)
+        .default_format_timestamp(false)
+        .default_format_module_path(false)
         .init();
 
     let config = get_config();

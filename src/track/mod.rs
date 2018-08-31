@@ -76,8 +76,9 @@ impl<'a> TimeTracker<'a> {
                 .open(&self.config.raw_data_path).unwrap();
             let time = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs();
 
-            debug!("File change stored for {}", project_name);
-            writeln!(&mut file, "{}/{}", project_name, time);
+            let log = format!("{}/{}", project_name, time);
+            debug!("Log stored: {}", log);
+            writeln!(&mut file, "{}", log);
         }
     }
 }
