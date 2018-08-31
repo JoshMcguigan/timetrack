@@ -15,7 +15,7 @@ impl<'a> TimeTracker<'a> {
         let mut watchers = vec![]; // need to keep ownership of watchers so they aren't dropped at end of for-loop
 
         for track_path in &self.config.track_paths {
-            let mut watcher: RecommendedWatcher = Watcher::new(tx.clone(), Duration::from_secs(2)).unwrap();
+            let mut watcher: RecommendedWatcher = Watcher::new(tx.clone(), Duration::from_secs(0)).unwrap();
             watcher.watch(track_path, RecursiveMode::Recursive).unwrap();
 
             watchers.push(watcher);
