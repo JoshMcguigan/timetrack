@@ -25,6 +25,7 @@ impl<'a> TimeTracker<'a> {
             match rx.recv() {
                 Ok(event) => {
                     if let Some(path) = get_path_from_event(&event) {
+                        trace!("File change detected on {:?}", path);
                         self.store_path(path);
                     }
                 },
@@ -66,7 +67,7 @@ impl<'a> TimeTracker<'a> {
     fn store_path<T>(&self, path: T)
         where T: AsRef<Path>
     {
-        if let Some(data) = self.extract_project_name(path) {
+        if let Some(project_name) = self.extract_project_name(path) {
             let mut file = OpenOptions::new()
                 .read(true)
                 .write(true)
@@ -75,7 +76,8 @@ impl<'a> TimeTracker<'a> {
                 .open(&self.config.raw_data_path).unwrap();
             let time = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs();
 
-            writeln!(&mut file, "{}/{}", data, time);
+            debug!("File change stored for {}", project_name);
+            writeln!(&mut file, "{}/{}", project_name, time);
         }
     }
 }
