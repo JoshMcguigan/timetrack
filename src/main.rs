@@ -6,10 +6,12 @@ use timetrack::get_config;
 use timetrack::TimeTracker;
 use clap::SubCommand;
 use clap::Arg;
-use log::LevelFilter;
 
 extern crate log;
 extern crate env_logger;
+
+mod logger;
+use logger::logger_init;
 
 fn main() {
     let matches = App::new("TimeTrack")
@@ -22,20 +24,7 @@ fn main() {
         .subcommand(SubCommand::with_name("config"))
         .get_matches();
 
-    let log_level = match matches.occurrences_of("v") {
-        0 => LevelFilter::Off,
-        1 => LevelFilter::Error,
-        2 => LevelFilter::Warn,
-        3 => LevelFilter::Info,
-        4 => LevelFilter::Debug,
-        5 | _ => LevelFilter::Trace,
-    };
-
-    env_logger::Builder::new()
-        .filter_level(log_level)
-        .default_format_timestamp(false)
-        .default_format_module_path(false)
-        .init();
+    logger_init(matches.occurrences_of("v"));
 
     let config = get_config();
     let time_tracker = TimeTracker::new(&config);
