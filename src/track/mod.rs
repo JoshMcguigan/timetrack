@@ -7,6 +7,10 @@ use std::sync::mpsc::channel;
 use std::time::Duration;
 use std::time::SystemTime;
 use TimeTracker;
+use std::sync::mpsc::TryRecvError;
+use std::thread;
+use std::time::Instant;
+use std::collections::HashSet;
 
 impl<'a> TimeTracker<'a> {
     pub fn track(&self) {
@@ -21,16 +25,54 @@ impl<'a> TimeTracker<'a> {
             watchers.push(watcher);
         }
 
+        let mut first_record_time;
+        let write_delay = Duration::from_secs(2);
+        let mut events = vec![];
+
         loop {
             match rx.recv() {
                 Ok(event) => {
-                    if let Some(path) = get_path_from_event(&event) {
-                        trace!("File change detected on {:?}", path);
-                        self.store_path(path);
+                    first_record_time = Instant::now();
+                    events.push(event);
+
+                    // wait a small ammount of additional time to see if other events come in
+                    loop {
+                        match rx.try_recv() {
+                            Ok(event) => {
+                                events.push(event);
+                            },
+                            Err(e) =>{
+                                // TODO how can this be done without nesting the match statements
+                                match e {
+                                    TryRecvError::Empty => thread::sleep(Duration::from_millis(100)),
+                                    TryRecvError::Disconnected => println!("watch error: {:?}", e),
+                                }
+                            },
+                        };
+
+                        if first_record_time.elapsed() >= write_delay {
+                            break;
+                        }
                     }
                 },
                 Err(e) => println!("watch error: {:?}", e),
-            };
+            }
+
+            first_record_time = Instant::now();
+            let mut projects = HashSet::new();
+            for event in events.drain(..) {
+                if let Some(path) = get_path_from_event(&event) {
+                    if let Some(project) = self.extract_project_name(path) {
+                        trace!("File change detected on {:?}", path);
+                        projects.insert(project);
+                    }
+                }
+            }
+
+            for project in projects {
+                self.store_project(project);
+            }
+
         }
     }
 
@@ -64,22 +106,18 @@ impl<'a> TimeTracker<'a> {
         None
     }
 
-    fn store_path<T>(&self, path: T)
-        where T: AsRef<Path>
-    {
-        if let Some(project_name) = self.extract_project_name(path) {
-            let mut file = OpenOptions::new()
-                .read(true)
-                .write(true)
-                .create(true)
-                .append(true)
-                .open(&self.config.raw_data_path).unwrap();
-            let time = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs();
+    fn store_project(&self, project_name: String) {
+        let mut file = OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create(true)
+            .append(true)
+            .open(&self.config.raw_data_path).unwrap();
+        let time = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs();
 
-            let log = format!("{}/{}", project_name, time);
-            debug!("Log stored: {}", log);
-            writeln!(&mut file, "{}", log);
-        }
+        let log = format!("{}/{}", project_name, time);
+        debug!("Log stored: {}", log);
+        writeln!(&mut file, "{}", log);
     }
 }
 
