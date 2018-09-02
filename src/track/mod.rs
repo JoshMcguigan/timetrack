@@ -30,24 +30,18 @@ impl<'a> TimeTracker<'a> {
         let mut events = vec![];
 
         loop {
+            // block waiting for the first event
             match rx.recv() {
                 Ok(event) => {
                     first_record_time = Instant::now();
                     events.push(event);
 
-                    // wait a small ammount of additional time to see if other events come in
+                    // wait a small amount of additional time to see if other events come in
                     loop {
                         match rx.try_recv() {
-                            Ok(event) => {
-                                events.push(event);
-                            },
-                            Err(e) =>{
-                                // TODO how can this be done without nesting the match statements
-                                match e {
-                                    TryRecvError::Empty => thread::sleep(Duration::from_millis(100)),
-                                    TryRecvError::Disconnected => println!("watch error: {:?}", e),
-                                }
-                            },
+                            Ok(event) => events.push(event),
+                            Err(TryRecvError::Empty) => thread::sleep(Duration::from_millis(100)),
+                            Err(e) => println!("watch error: {:?}", e),
                         };
 
                         if first_record_time.elapsed() >= write_delay {
@@ -64,6 +58,7 @@ impl<'a> TimeTracker<'a> {
                 if let Some(path) = get_path_from_event(&event) {
                     if let Some(project) = self.extract_project_name(path) {
                         trace!("File change detected on {:?}", path);
+                        // dedup project list by inserting into hashmap
                         projects.insert(project);
                     }
                 }
@@ -76,22 +71,6 @@ impl<'a> TimeTracker<'a> {
         }
     }
 
-    fn get_project_name_from_path(&self, path: &Path) -> String {
-        for track_path in &self.config.track_paths {
-            if let Ok(path) = path.strip_prefix(track_path) {
-                return path
-                    .components()
-                    .next()
-                    .expect("Path only contained root path")
-                    .as_os_str()
-                    .to_string_lossy()
-                    .to_string()
-            };
-        }
-
-        panic!("Failed processing path which was not in configured track paths");
-    }
-
     fn extract_project_name<T>(&self, path: T) -> Option<String>
         where T: AsRef<Path>
     {
@@ -99,8 +78,19 @@ impl<'a> TimeTracker<'a> {
         let raw_data_file_path = PathBuf::from(&self.config.raw_data_path);
         // TODO handle file system separators in platform independent way
         if path != raw_data_file_path {
-            let project = self.get_project_name_from_path(path);
-            return Some(project)
+            for track_path in &self.config.track_paths {
+                if let Ok(path) = path.strip_prefix(track_path) {
+                    return Some(path
+                        .components()
+                        .next()
+                        .expect("Path only contained root path")
+                        .as_os_str()
+                        .to_string_lossy()
+                        .to_string())
+                };
+            }
+
+            panic!("Failed processing path which was not in configured track paths");
         }
 
         None
