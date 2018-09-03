@@ -26,6 +26,10 @@ fn main() {
             .about("Clear all TimeTrack history (Warning: this cannot be undone)"))
         .subcommand(SubCommand::with_name("config")
             .about("Display the TimeTrack configuration"))
+        .subcommand(SubCommand::with_name("schedule")
+            .about("Schedule TimeTrack to start tracking on login for the current user"))
+        .subcommand(SubCommand::with_name("unschedule")
+            .about("Disable automatic tracking on login for the current user"))
         .get_matches();
 
     logger_init(matches.occurrences_of("v"));
@@ -40,6 +44,10 @@ fn main() {
         time_tracker.track();
     } else if matches.subcommand_matches("config").is_some() {
         time_tracker.print_config();
+    } else if matches.subcommand_matches("schedule").is_some() {
+        time_tracker.schedule();
+    } else if matches.subcommand_matches("unschedule").is_some() {
+        time_tracker.unschedule();
     } else {
         time_tracker.calc();
     }

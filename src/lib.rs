@@ -9,6 +9,7 @@ mod config;
 mod calc;
 mod track;
 mod clear;
+mod schedule;
 
 use config::Configuration;
 
