@@ -1,4 +1,3 @@
-#![allow(unused_assignments)] // TODO determine why this warns incorrectly
 extern crate notify;
 extern crate directories;
 extern crate toml;

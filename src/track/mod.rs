@@ -52,7 +52,6 @@ impl<'a> TimeTracker<'a> {
                 Err(e) => println!("watch error: {:?}", e),
             }
 
-            first_record_time = Instant::now();
             let mut projects = HashSet::new();
             for event in events.drain(..) {
                 if let Some(path) = get_path_from_event(&event) {
