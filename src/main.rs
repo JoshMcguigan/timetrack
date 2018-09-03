@@ -20,9 +20,12 @@ fn main() {
             .short("v")
             .multiple(true)
             .help("Sets the level of verbosity (0-5, example: -vv for WARN)"))
-        .subcommand(SubCommand::with_name("track"))
-        .subcommand(SubCommand::with_name("clear"))
-        .subcommand(SubCommand::with_name("config"))
+        .subcommand(SubCommand::with_name("track")
+            .about("Starts the file system watcher for time tracking"))
+        .subcommand(SubCommand::with_name("clear")
+            .about("Clear all TimeTrack history (Warning: this cannot be undone)"))
+        .subcommand(SubCommand::with_name("config")
+            .about("Display the TimeTrack configuration"))
         .get_matches();
 
     logger_init(matches.occurrences_of("v"));
