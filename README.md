@@ -4,11 +4,21 @@ TimeTrack watches the file system to automatically track how much time you are s
 
 ## Setup
 
+### Install
+
 TimeTrack requires Rust in order to build/install. If you need to install Rust, follow [these instructions](https://www.rust-lang.org/en-US/install.html). Once you have Rust installed, TimeTrack can be installed by running the command below:
 
 ```
 cargo install timetrack
 ```
+
+### Configure tracking path(s)
+
+By default, TimeTrack is configured to watch your home directory. You will likely want to reconfigure TimeTrack to watch whichever directory you use to store your projects. After installing TimeTrack, run `timetrack config` to find the `User configuration` file. Edit that file to configure TimeTrack to watch the appropriate directory (or directories if you have multiple, note that at this time TimeTrack does not support watching directories which are nested within one another). As an example, the full contents of my TimeTrack configuration file are `track_paths = ["/Users/josh/Projects"]`. After editing the configuration file, run `timetrack config` again to confirm the `Tracking paths` are displayed correctly.
+
+### Automatic startup
+
+The `timetrack track` command starts TimeTrack in tracking mode. This should be running any time you want to track time. While you can manually start/stop this process, it is recommended that you configure your system to start this process automatically on startup. The specific steps to do this will depend on your OS.  
 
 ## Use
 
