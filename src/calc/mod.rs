@@ -83,12 +83,8 @@ fn calculate_project_total_time(spans: Vec<Span>) -> HashMap<String, u64> {
         let span_duration = span.duration();
         let span_name = span.name;
 
-        if project_totals.contains_key(&span_name) {
-            let old_total = project_totals.remove(&span_name).unwrap();
-            project_totals.insert(span_name, old_total + span_duration);
-        } else {
-            project_totals.insert(span_name, span_duration);
-        };
+        let duration = project_totals.entry(span_name).or_insert(0);
+        *duration += span_duration;
     }
 
     project_totals
