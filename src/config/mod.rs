@@ -36,6 +36,18 @@ impl Display for Configuration {
     }
 }
 
+impl Configuration {
+    /// Used for creating mock configuration files to test other modules
+    pub fn new_mock_config(track_paths: Vec<PathBuf>, raw_data_path: PathBuf, processed_data_path: PathBuf) -> Self {
+        Configuration {
+            user_config_path: PathBuf::new(), // this is a private field so for mocking purposes doesn't matter
+            track_paths,
+            raw_data_path,
+            processed_data_path,
+        }
+    }
+}
+
 #[derive(Deserialize, Serialize)]
 struct UserConfig {
     track_paths: Vec<PathBuf>

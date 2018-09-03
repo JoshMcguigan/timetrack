@@ -162,13 +162,13 @@ mod tests {
     }
 
     fn get_mock_config() -> Configuration {
-        Configuration {
-            track_paths: vec![
+        Configuration::new_mock_config(
+            vec![
                 PathBuf::from("/Users/josh/Projects"),
                 PathBuf::from("/Users/josh/OtherProjects"),
             ],
-            raw_data_path: PathBuf::from("/Users/josh/.timetrack_raw"),
-            processed_data_path: PathBuf::from("/Users/josh/.timetrack_processed"),
-        }
+            PathBuf::from("/Users/josh/.timetrack_raw"),
+            PathBuf::from("/Users/josh/.timetrack_processed")
+        )
     }
 }
