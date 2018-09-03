@@ -1,4 +1,4 @@
-extern crate clap;
+#[macro_use] extern crate clap;
 use clap::App;
 
 extern crate timetrack;
@@ -15,6 +15,7 @@ use logger::logger_init;
 
 fn main() {
     let matches = App::new("TimeTrack")
+        .version(crate_version!())
         .arg(Arg::with_name("v")
             .short("v")
             .multiple(true)
