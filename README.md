@@ -18,7 +18,7 @@ By default, TimeTrack is configured to watch your home directory. You will likel
 
 ### Automatic startup
 
-The `timetrack track` command starts TimeTrack in tracking mode. This should be running any time you want to track time. While you can manually start/stop this process, it is recommended that you configure your system to start this process automatically on startup. The specific steps to do this will depend on your OS.  
+The `timetrack track` command starts TimeTrack in tracking mode. This should be running any time you want to track time. While you can manually start/stop this process, it is recommended that you configure your system to start this process automatically on startup. The specific steps to do this will depend on your OS. On OSX you can use `timetrack schedule` after TimeTrack has been installed to configure it to start tracking every time the current use logs in.  
 
 ## Use
 
@@ -34,6 +34,14 @@ The `timetrack track` command starts TimeTrack in tracking mode. This should be 
     
     # to view the configuration
     timetrack config
+    
+    # to configure TimeTrack to start tracking every time the current user logs in 
+    # currently only supported on OSX
+    timetrack schedule
+    
+    # to disable TimeTrack from starting every time the current user logs in 
+    # currently only supported on OSX
+    timetrack unschedule
 ```
 
 ## License
