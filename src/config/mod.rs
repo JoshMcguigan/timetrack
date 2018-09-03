@@ -13,6 +13,7 @@ use std::fmt;
 use std::fmt::Formatter;
 
 pub struct Configuration {
+    user_config_path: PathBuf, // this file should not be read outside this module
     pub track_paths: Vec<PathBuf>,
     pub raw_data_path: PathBuf,
     pub processed_data_path: PathBuf,
@@ -20,7 +21,14 @@ pub struct Configuration {
 
 impl Display for Configuration {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "TimeTrack Configuration\nTracking paths: {:?}\nRaw data path: {:?}\nProcessed data path: {:?}",
+        write!(f,
+// Caution: The indent level below matters
+"TimeTrack Configuration
+    User configuration: {:?}
+    Tracking paths: {:?}
+    Raw data: {:?}
+    Processed data: {:?}",
+            self.user_config_path,
             self.track_paths,
             self.raw_data_path,
             self.processed_data_path
@@ -42,9 +50,11 @@ pub fn get_config() -> Configuration {
 
     let raw_data_path = get_data_file_path(&project_dir, ".timetrack_raw");
     let processed_data_path = get_data_file_path(&project_dir, ".timetrack_processed");
-    let user_config = get_user_config(&project_dir);
+    let user_config_path = project_dir.config_dir().join("timetrack_config");
+    let user_config = read_user_config(&user_config_path);
 
     Configuration {
+        user_config_path,
         // TODO how to handle two track paths where one is a subdirectory of another
         track_paths: user_config.track_paths,
         raw_data_path,
@@ -54,7 +64,6 @@ pub fn get_config() -> Configuration {
 
 impl<'a> TimeTracker<'a> {
     pub fn print_config(&self) {
-        // TODO also print config file path and update docs to describe how to configure timetrack
         println!("{}", self.config);
     }
 }
@@ -75,17 +84,14 @@ fn get_data_file_path(project_dirs: &ProjectDirs, filename: &str) -> PathBuf {
     data_file_path
 }
 
-fn get_user_config(project_dirs: &ProjectDirs) -> UserConfig {
-    let config_dir = project_dirs.config_dir();
-    let config_file_path = config_dir.join("timetrack_config");
-
-    if !config_file_path.exists() {
-        init_config_file(&config_dir, &config_file_path);
+fn read_user_config(user_config_path: &PathBuf) -> UserConfig {
+    if !user_config_path.exists() {
+        init_config_file(&user_config_path);
     }
 
     let mut f = OpenOptions::new()
         .read(true)
-        .open(&config_file_path)
+        .open(&user_config_path)
         .expect("Failed to open config file");
 
     let mut contents = String::new();
@@ -95,10 +101,8 @@ fn get_user_config(project_dirs: &ProjectDirs) -> UserConfig {
     toml::from_str(&contents).expect("Failed to parse config file as TOML")
 }
 
-fn init_config_file(
-        config_dir: impl AsRef<Path>,
-        config_file_path: impl AsRef<Path>
-    ) {
+fn init_config_file(config_file_path: impl AsRef<Path>) {
+    let config_dir = config_file_path.as_ref().parent().unwrap();
 
     fs::create_dir_all(&config_dir)
         .expect("Failed to create config directory");
