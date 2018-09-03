@@ -53,8 +53,8 @@ impl<'a> TimeTracker<'a> {
             }
 
             let mut projects = HashSet::new();
-            for event in events.drain(..) {
-                if let Some(path) = get_path_from_event(&event) {
+            for event in &events {
+                if let Some(path) = get_path_from_event(event) {
                     if let Some(project) = self.extract_project_name(path) {
                         trace!("File change detected on {:?}", path);
                         // dedup project list by inserting into hashmap
@@ -64,7 +64,7 @@ impl<'a> TimeTracker<'a> {
             }
 
             for project in projects {
-                self.store_project(project);
+                self.store_project(&project);
             }
 
         }
@@ -95,7 +95,7 @@ impl<'a> TimeTracker<'a> {
         None
     }
 
-    fn store_project(&self, project_name: String) {
+    fn store_project(&self, project_name: &str) {
         let mut file = OpenOptions::new()
             .read(true)
             .write(true)
