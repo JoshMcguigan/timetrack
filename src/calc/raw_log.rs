@@ -8,7 +8,7 @@ pub struct RawLog {
     pub timestamp: u64,
 }
 
-pub fn raw_logs_from(raw_data: String) -> Vec<RawLog> {
+pub fn raw_logs_from(raw_data: &str) -> Vec<RawLog> {
     let mut raw_logs = vec![];
 
     for line in raw_data.lines() {
@@ -21,7 +21,7 @@ pub fn raw_logs_from(raw_data: String) -> Vec<RawLog> {
 impl<'a> From<&'a str> for RawLog {
     fn from(raw_data: &'a str) -> Self {
         // TODO convert this to try_from
-        let mut parts = raw_data.split("/");
+        let mut parts = raw_data.split('/');
         RawLog { name: parts.next().unwrap().to_string(), timestamp: parts.next().unwrap().parse::<u64>().unwrap() }
     }
 }
@@ -44,7 +44,7 @@ mod tests {
     fn raw_logs_from_string() {
         let raw_data = "testproj1/123\ntestproj2/456\n";
 
-        let raw_logs = raw_logs_from(String::from(raw_data));
+        let raw_logs = raw_logs_from(raw_data);
 
         assert_eq!(2, raw_logs.len());
 

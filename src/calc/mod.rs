@@ -28,7 +28,7 @@ impl<'a> TimeTracker<'a> {
             raw_data_file.read_to_string(&mut raw_data)
                 .expect("something went wrong reading the file");
         }
-        let new_spans = get_spans_from(raw_logs_from(raw_data));
+        let new_spans = get_spans_from(raw_logs_from(&raw_data));
 
         // append spans to processed data file
         {
@@ -69,7 +69,7 @@ impl<'a> TimeTracker<'a> {
         let mut all_spans_string = String::new();
         processed_data_file.read_to_string(&mut all_spans_string)
             .expect("Failed to read processed data");
-        let all_spans = spans_from(all_spans_string);
+        let all_spans = spans_from(&all_spans_string);
 
         display(&calculate_project_total_time(all_spans));
     }

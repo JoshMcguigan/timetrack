@@ -30,7 +30,7 @@ impl Display for Span {
     }
 }
 
-pub fn spans_from(processed_data: String) -> Vec<Span> {
+pub fn spans_from(processed_data: &str) -> Vec<Span> {
     let mut spans = vec![];
 
     for line in processed_data.lines() {
