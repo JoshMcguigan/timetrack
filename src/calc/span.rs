@@ -81,7 +81,7 @@ pub fn get_spans_from(mut raw_logs: Vec<RawLog>) -> Vec<Span> {
     spans
 }
 
-pub fn get_last_timestamp_per_project(spans: &Vec<Span>) -> HashMap<String,u64> {
+pub fn get_last_timestamp_per_project(spans: &[Span]) -> HashMap<String,u64> {
     let mut map = HashMap::new();
 
     for span in spans {
@@ -102,14 +102,13 @@ pub fn get_last_timestamp_per_project(spans: &Vec<Span>) -> HashMap<String,u64> 
 }
 
 pub fn get_vec_raw_logs_from_map_last_timestamp_per_project(map: HashMap<String, u64>) -> Vec<RawLog> {
-    let mut raw_logs = vec![];
-    for (project_name, timestamp) in map.into_iter() {
-        let raw_log = RawLog {
-            name: project_name,
-            timestamp,
-        };
-        raw_logs.push(raw_log);
-    }
+    let mut raw_logs: Vec<RawLog> = map.into_iter()
+        .map(|(project_name, timestamp)| {
+            RawLog {
+                name: project_name,
+                timestamp,
+            }
+        }).collect();
 
     raw_logs.sort_by(|a,b| a.timestamp.cmp(&b.timestamp) );
 
