@@ -42,7 +42,7 @@ pub fn spans_from(processed_data: String) -> Vec<Span> {
 
 impl<'a> From<&'a str> for Span {
     fn from(raw_data: &'a str) -> Self {
-        let mut parts = raw_data.split("/");
+        let mut parts = raw_data.split('/');
         Span {
             name: parts.next().unwrap().to_string(),
             start: parts.next().unwrap().parse::<u64>().unwrap(),
@@ -52,13 +52,13 @@ impl<'a> From<&'a str> for Span {
 }
 
 pub fn get_spans_from(mut raw_logs: Vec<RawLog>) -> Vec<Span> {
-    if raw_logs.len() == 0 { return vec![] }
+    if raw_logs.is_empty() { return vec![] }
 
     let mut spans = vec![];
 
     let first_log = raw_logs.remove(0);
 
-    let mut span = Span {name: String::from(first_log.name), start: first_log.timestamp, end: first_log.timestamp};
+    let mut span = Span {name:first_log.name, start: first_log.timestamp, end: first_log.timestamp};
     for log in raw_logs {
         let same_name = log.name == span.name;
         let small_time_gap = log.timestamp.saturating_sub(span.end) < MAX_SECONDS_BETWEEN_RECORDS_IN_SPAN;
@@ -69,11 +69,11 @@ pub fn get_spans_from(mut raw_logs: Vec<RawLog>) -> Vec<Span> {
                 let mid_point_time = (max(log.timestamp, span.end) - min(log.timestamp, span.end)) / 2 + min(log.timestamp, span.end);
                 span.end = mid_point_time;
                 spans.push(span);
-                span = Span {name: String::from(log.name), start: mid_point_time, end: log.timestamp};
+                span = Span {name: log.name, start: mid_point_time, end: log.timestamp};
             },
             (_, false) => {
                 spans.push(span);
-                span = Span {name: String::from(log.name), start: log.timestamp, end: log.timestamp};
+                span = Span {name: log.name, start: log.timestamp, end: log.timestamp};
             }
         };
     }
