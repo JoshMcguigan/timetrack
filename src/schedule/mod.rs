@@ -1,9 +1,9 @@
+use directories::UserDirs;
+use std::fs;
 use std::fs::OpenOptions;
 use std::io::Write;
-use TimeTracker;
-use directories::UserDirs;
 use std::path::PathBuf;
-use std::fs;
+use TimeTracker;
 
 #[allow(dead_code)]
 fn not_supported() {
@@ -12,7 +12,7 @@ fn not_supported() {
 
 fn get_plist_file_contents() -> String {
     format!(
-r#"<?xml version="1.0" encoding="UTF-8"?>
+        r#"<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
     <dict>
@@ -27,12 +27,16 @@ r#"<?xml version="1.0" encoding="UTF-8"?>
         <true/>
     </dict>
 </plist>
-"#, UserDirs::new().unwrap().home_dir().to_string_lossy()
+"#,
+        UserDirs::new().unwrap().home_dir().to_string_lossy()
     ).to_string()
 }
 
 fn get_plist_file_path() -> PathBuf {
-    UserDirs::new().unwrap().home_dir().join("Library/LaunchAgents/rust.cargo.timetrack.plist")
+    UserDirs::new()
+        .unwrap()
+        .home_dir()
+        .join("Library/LaunchAgents/rust.cargo.timetrack.plist")
 }
 
 impl<'a> TimeTracker<'a> {
@@ -57,8 +61,8 @@ impl<'a> TimeTracker<'a> {
     #[cfg(target_os = "macos")]
     pub fn unschedule(&self) {
         match fs::remove_file(get_plist_file_path()) {
-            Ok(_) => { println!("TimeTrack schedule removed.") },
-            Err(_) => { println!("Failed to remove TimeTrack schedule.") },
+            Ok(_) => println!("TimeTrack schedule removed."),
+            Err(_) => println!("Failed to remove TimeTrack schedule."),
         }
     }
 
@@ -66,5 +70,4 @@ impl<'a> TimeTracker<'a> {
     pub fn unschedule(&self) {
         not_supported();
     }
-
 }

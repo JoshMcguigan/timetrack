@@ -1,14 +1,15 @@
-#[macro_use] extern crate clap;
+#[macro_use]
+extern crate clap;
 use clap::App;
 
 extern crate timetrack;
+use clap::Arg;
+use clap::SubCommand;
 use timetrack::get_config;
 use timetrack::TimeTracker;
-use clap::SubCommand;
-use clap::Arg;
 
-extern crate log;
 extern crate env_logger;
+extern crate log;
 
 mod logger;
 use logger::logger_init;
@@ -16,21 +17,25 @@ use logger::logger_init;
 fn main() {
     let matches = App::new("TimeTrack")
         .version(crate_version!())
-        .arg(Arg::with_name("v")
-            .short("v")
-            .multiple(true)
-            .help("Sets the level of verbosity (0-5, example: -vv for WARN)"))
-        .subcommand(SubCommand::with_name("track")
-            .about("Starts the file system watcher for time tracking"))
-        .subcommand(SubCommand::with_name("clear")
-            .about("Clear all TimeTrack history (Warning: this cannot be undone)"))
-        .subcommand(SubCommand::with_name("config")
-            .about("Display the TimeTrack configuration"))
-        .subcommand(SubCommand::with_name("schedule")
-            .about("Schedule TimeTrack to start tracking on login for the current user"))
-        .subcommand(SubCommand::with_name("unschedule")
-            .about("Disable automatic tracking on login for the current user"))
-        .get_matches();
+        .arg(
+            Arg::with_name("v")
+                .short("v")
+                .multiple(true)
+                .help("Sets the level of verbosity (0-5, example: -vv for WARN)"),
+        ).subcommand(
+            SubCommand::with_name("track")
+                .about("Starts the file system watcher for time tracking"),
+        ).subcommand(
+            SubCommand::with_name("clear")
+                .about("Clear all TimeTrack history (Warning: this cannot be undone)"),
+        ).subcommand(SubCommand::with_name("config").about("Display the TimeTrack configuration"))
+        .subcommand(
+            SubCommand::with_name("schedule")
+                .about("Schedule TimeTrack to start tracking on login for the current user"),
+        ).subcommand(
+            SubCommand::with_name("unschedule")
+                .about("Disable automatic tracking on login for the current user"),
+        ).get_matches();
 
     logger_init(matches.occurrences_of("v"));
 

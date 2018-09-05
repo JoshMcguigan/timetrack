@@ -1,16 +1,16 @@
-use directories::ProjectDirs;
 use directories::BaseDirs;
-use std::path::PathBuf;
-use std::fs::OpenOptions;
-use std::fs;
-use TimeTracker;
-use std::path::Path;
-use std::io::Write;
-use std::io::Read;
-use toml;
-use std::fmt::Display;
+use directories::ProjectDirs;
 use std::fmt;
+use std::fmt::Display;
 use std::fmt::Formatter;
+use std::fs;
+use std::fs::OpenOptions;
+use std::io::Read;
+use std::io::Write;
+use std::path::Path;
+use std::path::PathBuf;
+use toml;
+use TimeTracker;
 
 pub struct Configuration {
     user_config_path: PathBuf, // this file should not be read outside this module
@@ -38,7 +38,11 @@ impl Display for Configuration {
 
 impl Configuration {
     /// Used for creating mock configuration files to test other modules
-    pub fn new_mock_config(track_paths: Vec<PathBuf>, raw_data_path: PathBuf, processed_data_path: PathBuf) -> Self {
+    pub fn new_mock_config(
+        track_paths: Vec<PathBuf>,
+        raw_data_path: PathBuf,
+        processed_data_path: PathBuf,
+    ) -> Self {
         Configuration {
             user_config_path: PathBuf::new(), // this is a private field so for mocking purposes doesn't matter
             track_paths,
@@ -50,15 +54,12 @@ impl Configuration {
 
 #[derive(Deserialize, Serialize)]
 struct UserConfig {
-    track_paths: Vec<PathBuf>
+    track_paths: Vec<PathBuf>,
 }
 
 pub fn get_config() -> Configuration {
-    let project_dir = ProjectDirs::from(
-        "rust",
-        "cargo",
-        "timetrack"
-    ).expect("Failed to read project directories");
+    let project_dir = ProjectDirs::from("rust", "cargo", "timetrack")
+        .expect("Failed to read project directories");
 
     let raw_data_path = get_data_file_path(&project_dir, ".timetrack_raw");
     let processed_data_path = get_data_file_path(&project_dir, ".timetrack_processed");
@@ -84,8 +85,7 @@ fn get_data_file_path(project_dirs: &ProjectDirs, filename: &str) -> PathBuf {
     let data_directory = project_dirs.data_local_dir();
     let data_file_path = data_directory.join(filename);
 
-    fs::create_dir_all(&data_directory)
-        .expect("Failed to create data directory");
+    fs::create_dir_all(&data_directory).expect("Failed to create data directory");
     OpenOptions::new()
         .create(true)
         .read(true)
@@ -116,8 +116,7 @@ fn read_user_config(user_config_path: &PathBuf) -> UserConfig {
 fn init_config_file(config_file_path: impl AsRef<Path>) {
     let config_dir = config_file_path.as_ref().parent().unwrap();
 
-    fs::create_dir_all(&config_dir)
-        .expect("Failed to create config directory");
+    fs::create_dir_all(&config_dir).expect("Failed to create config directory");
     let mut f = OpenOptions::new()
         .create(true)
         .read(true)
@@ -126,12 +125,16 @@ fn init_config_file(config_file_path: impl AsRef<Path>) {
         .expect("Failed to create config file");
 
     let home_dir = BaseDirs::new()
-                            .expect("Unable to find home directory")
-                            .home_dir()
-                            .to_owned();
+        .expect("Unable to find home directory")
+        .home_dir()
+        .to_owned();
     let default_config = UserConfig {
-        track_paths: vec![home_dir]
+        track_paths: vec![home_dir],
     };
 
-    write!(&mut f, "{}", toml::to_string(&default_config).expect("Failed to convert default user config to TOML"));
+    write!(
+        &mut f,
+        "{}",
+        toml::to_string(&default_config).expect("Failed to convert default user config to TOML")
+    );
 }

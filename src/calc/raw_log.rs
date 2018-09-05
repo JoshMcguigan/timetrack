@@ -1,6 +1,6 @@
+use std::fmt;
 use std::fmt::Display;
 use std::fmt::Formatter;
-use std::fmt;
 
 #[derive(PartialEq, Debug)]
 pub struct RawLog {
@@ -22,19 +22,18 @@ impl<'a> From<&'a str> for RawLog {
     fn from(raw_data: &'a str) -> Self {
         // TODO convert this to try_from
         let mut parts = raw_data.split('/');
-        RawLog { name: parts.next().unwrap().to_string(), timestamp: parts.next().unwrap().parse::<u64>().unwrap() }
+        RawLog {
+            name: parts.next().unwrap().to_string(),
+            timestamp: parts.next().unwrap().parse::<u64>().unwrap(),
+        }
     }
 }
 
 impl Display for RawLog {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "{}/{}",
-               self.name,
-               self.timestamp,
-        )
+        write!(f, "{}/{}", self.name, self.timestamp,)
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -47,13 +46,18 @@ mod tests {
         let raw_logs = raw_logs_from(raw_data);
 
         assert_eq!(2, raw_logs.len());
-
     }
 
     #[test]
     fn raw_log_from_str() {
         let raw_data = "josh/123";
-        assert_eq!(RawLog {name: String::from("josh"), timestamp: 123u64 }, RawLog::from(raw_data));
+        assert_eq!(
+            RawLog {
+                name: String::from("josh"),
+                timestamp: 123u64
+            },
+            RawLog::from(raw_data)
+        );
     }
 
     #[test]

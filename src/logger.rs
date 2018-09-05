@@ -1,7 +1,7 @@
 use env_logger;
 use log::LevelFilter;
 
-pub fn logger_init(log_level: u64){
+pub fn logger_init(log_level: u64) {
     let log_level = match log_level {
         0 => LevelFilter::Off,
         1 => LevelFilter::Error,

@@ -1,11 +1,11 @@
+use std::fs;
+use std::fs::OpenOptions;
+use std::io::Write;
 use std::process::Child;
 use std::process::Command;
 use std::process::Stdio;
-use std::time;
 use std::thread;
-use std::fs::OpenOptions;
-use std::fs;
-use std::io::Write;
+use std::time;
 extern crate timetrack;
 use timetrack::get_config;
 
@@ -14,8 +14,14 @@ struct Backup;
 impl Backup {
     fn new() -> Self {
         let config = get_config();
-        fs::copy(&config.raw_data_path, (&config.raw_data_path).clone().with_extension("bak")).unwrap();
-        fs::copy(&config.processed_data_path, (&config.processed_data_path).clone().with_extension("bak")).unwrap();
+        fs::copy(
+            &config.raw_data_path,
+            (&config.raw_data_path).clone().with_extension("bak"),
+        ).unwrap();
+        fs::copy(
+            &config.processed_data_path,
+            (&config.processed_data_path).clone().with_extension("bak"),
+        ).unwrap();
 
         Backup
     }
@@ -24,8 +30,14 @@ impl Backup {
 impl Drop for Backup {
     fn drop(&mut self) {
         let config = get_config();
-        fs::rename((&config.raw_data_path).clone().with_extension("bak"), &config.raw_data_path).unwrap();
-        fs::rename((&config.processed_data_path).clone().with_extension("bak"), &config.processed_data_path).unwrap();
+        fs::rename(
+            (&config.raw_data_path).clone().with_extension("bak"),
+            &config.raw_data_path,
+        ).unwrap();
+        fs::rename(
+            (&config.processed_data_path).clone().with_extension("bak"),
+            &config.processed_data_path,
+        ).unwrap();
     }
 }
 
@@ -61,17 +73,20 @@ fn clear_and_verify() {
 
     let calc = calc_proc();
 
-    let output = calc
-        .wait_with_output()
-        .expect("failed to wait on child");
+    let output = calc.wait_with_output().expect("failed to wait on child");
 
     let output_text = String::from_utf8_lossy(output.stdout.as_ref());
 
     assert_eq!("No time track data found\n", output_text); // ensure logs have been cleared
 }
 
-fn create_filesystem_noise(){
-    let test_file_path = get_config().track_paths.get(0).unwrap().to_owned().join("timetrack/__integration_test__");
+fn create_filesystem_noise() {
+    let test_file_path = get_config()
+        .track_paths
+        .get(0)
+        .unwrap()
+        .to_owned()
+        .join("timetrack/__integration_test__");
 
     {
         let mut file = OpenOptions::new()
@@ -79,7 +94,8 @@ fn create_filesystem_noise(){
             .write(true)
             .create(true)
             .append(true)
-            .open(&test_file_path).unwrap();
+            .open(&test_file_path)
+            .unwrap();
         write!(file, "testing");
     }
 
@@ -109,9 +125,7 @@ fn integration() {
 
     let calc = calc_proc();
 
-    let output = calc
-        .wait_with_output()
-        .expect("failed to wait on child");
+    let output = calc.wait_with_output().expect("failed to wait on child");
 
     let output_text = String::from_utf8_lossy(output.stdout.as_ref());
 
