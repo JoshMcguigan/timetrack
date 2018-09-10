@@ -5,6 +5,8 @@ extern crate toml;
 extern crate serde_derive;
 #[macro_use]
 extern crate log;
+#[macro_use]
+extern crate prettytable;
 
 mod calc;
 mod clear;

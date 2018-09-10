@@ -1,36 +1,62 @@
 use std::collections::HashMap;
+use prettytable::Table;
 
 static NO_DATA_WARNING: &'static str = "No time track data found";
 
-pub fn display(data: &HashMap<String, u64>) {
-    println!("{}", format(data));
+pub fn display(data: HashMap<String, u64>) {
+    let output_rows = format(data);
+
+    if output_rows.is_empty() {
+        println!("{}", NO_DATA_WARNING);
+    } else {
+        print_table(output_rows);
+    }
 }
 
-fn format(data: &HashMap<String, u64>) -> String {
-    let mut output_lines = vec![];
+fn format(data: HashMap<String, u64>) -> Vec<(String, String)> {
+    let mut output_rows = vec![];
 
-    for (project, time_in_seconds) in data.iter() {
-        let hours = time_in_seconds / (60 * 60);
-        let minutes = (time_in_seconds - (hours * 60 * 60)) / 60;
-        let seconds = time_in_seconds - (hours * 60 * 60) - (minutes * 60);
-
-        let output_line = match (hours, minutes, seconds) {
-            (0, 0, seconds) => format!("{} - {} seconds", project, seconds),
-            (0, minutes, seconds) => {
-                format!("{} - {} minutes {} seconds", project, minutes, seconds)
-            }
-            (hours, minutes, _) => format!("{} - {} hours {} minutes", project, hours, minutes),
-        };
-
-        output_lines.push(output_line);
+    for (project, time_in_seconds) in data {
+        if time_in_seconds > 0 {
+            output_rows.push((project, to_hms(time_in_seconds)));
+        }
     }
 
-    if output_lines.is_empty() {
-        return String::from(NO_DATA_WARNING);
+    output_rows
+        .sort_by(|(a, _), (b, _)|
+            a.cmp(b)
+        ); // alphabetize the output by project name
+
+    output_rows
+}
+
+fn print_table(output_rows: Vec<(String, String)>) {
+    let mut table = Table::new();
+
+    // header row is bold
+    table.add_row(row![b -> "Project Name", b -> "Time"]);
+    for (project, time) in output_rows {
+        table.add_row(row![project, time]);
     }
 
-    output_lines.sort(); // alphabetize the output by project name
-    output_lines.join("\n")
+    table.printstd();
+}
+
+/// Converts a duration in seconds to a human readable string
+fn to_hms(seconds: u64) -> String {
+    let hours = seconds / (60 * 60);
+    let minutes = (seconds - (hours * 60 * 60)) / 60;
+    let seconds = seconds - (hours * 60 * 60) - (minutes * 60);
+
+    match (hours, minutes, seconds) {
+        (0, 0, 0) => String::from("None"),
+        (0, 0, 1) => String::from("1 second"),
+        (0, 0, seconds) => format!("{} seconds", seconds),
+        (0, 1, _) => String::from("1 minute"),
+        (0, minutes, _) => format!("{} minutes", minutes),
+        (1, minutes, _) => format!("1 hour {} minutes", minutes),
+        (hours, minutes, _) => format!("{} hours {} minutes", hours, minutes),
+    }
 }
 
 #[cfg(test)]
@@ -38,44 +64,37 @@ mod tests {
     use super::*;
 
     #[test]
-    fn format_no_data() {
-        let data = HashMap::new();
-        assert_eq!(NO_DATA_WARNING, format(&data));
+    fn to_hms_string_zero() {
+        assert_eq!("None", to_hms(0));
     }
 
     #[test]
-    fn format_seconds() {
-        let mut data = HashMap::new();
-        data.insert(String::from("project1"), 30);
-
-        assert_eq!("project1 - 30 seconds", format(&data));
+    fn to_hms_second() {
+        assert_eq!("1 second", to_hms(1));
     }
 
     #[test]
-    fn format_minutes() {
-        let mut data = HashMap::new();
-        data.insert(String::from("project1"), 330);
-
-        assert_eq!("project1 - 5 minutes 30 seconds", format(&data));
+    fn to_hms_seconds() {
+        assert_eq!("30 seconds", to_hms(30));
     }
 
     #[test]
-    fn format_hours() {
-        let mut data = HashMap::new();
-        data.insert(String::from("project1"), (5 * 60 * 60) + (10 * 60) + 30);
-
-        assert_eq!("project1 - 5 hours 10 minutes", format(&data));
+    fn to_hms_minute() {
+        assert_eq!("1 minute", to_hms(60));
     }
 
     #[test]
-    fn format_multiple_projects() {
-        let mut data = HashMap::new();
-        data.insert(String::from("project1"), 30);
-        data.insert(String::from("project2"), 330);
+    fn to_hms_minutes() {
+        assert_eq!("5 minutes", to_hms(330));
+    }
 
-        assert_eq!(
-            "project1 - 30 seconds\nproject2 - 5 minutes 30 seconds",
-            format(&data)
-        );
+    #[test]
+    fn to_hms_hour() {
+        assert_eq!("1 hour 10 minutes", to_hms((1 * 60 * 60) + (10 * 60) + 30));
+    }
+
+    #[test]
+    fn to_hms_hours() {
+        assert_eq!("5 hours 10 minutes", to_hms((5 * 60 * 60) + (10 * 60) + 30));
     }
 }

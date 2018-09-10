@@ -78,7 +78,7 @@ impl<'a> TimeTracker<'a> {
             .expect("Failed to read processed data");
         let all_spans = spans_from(&all_spans_string);
 
-        display(&calculate_project_total_time(all_spans));
+        display(calculate_project_total_time(all_spans));
     }
 }
 

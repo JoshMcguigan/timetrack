@@ -1,6 +1,6 @@
 [package]
 name = "timetrack"
-version = "0.2.3"
+version = "0.2.4"
 authors = ["Josh Mcguigan"]
 description = "Automatically track how you are spending your time by watching the file system"
 repository = "https://github.com/JoshMcguigan/timetrack"
@@ -17,3 +17,4 @@ serde = "1.0"
 serde_derive = "1.0"
 log = "0.4"
 env_logger = "0.5"
+prettytable-rs = "0.7"
