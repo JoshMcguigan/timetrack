@@ -54,7 +54,9 @@ fn to_hms(seconds: u64) -> String {
         (0, 0, seconds) => format!("{} seconds", seconds),
         (0, 1, _) => String::from("1 minute"),
         (0, minutes, _) => format!("{} minutes", minutes),
+        (1, 1, _) => String::from("1 hour 1 minute"),
         (1, minutes, _) => format!("1 hour {} minutes", minutes),
+        (hours, 1, _) => format!("{} hours 1 minute", hours),
         (hours, minutes, _) => format!("{} hours {} minutes", hours, minutes),
     }
 }
@@ -89,8 +91,18 @@ mod tests {
     }
 
     #[test]
+    fn to_hms_hour_minute() {
+        assert_eq!("1 hour 1 minute", to_hms((1 * 60 * 60) + (1 * 60) + 30));
+    }
+
+    #[test]
     fn to_hms_hour() {
         assert_eq!("1 hour 10 minutes", to_hms((1 * 60 * 60) + (10 * 60) + 30));
+    }
+
+    #[test]
+    fn to_hms_hours_minute() {
+        assert_eq!("5 hours 1 minute", to_hms((5 * 60 * 60) + (1 * 60) + 30));
     }
 
     #[test]
