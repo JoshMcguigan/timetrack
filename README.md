@@ -2,6 +2,8 @@
 
 TimeTrack watches the file system to automatically track how much time you are spending on each of your projects. 
 
+![screenshot](https://user-images.githubusercontent.com/22216761/45271448-f6c61380-b45b-11e8-9fb8-2485fff06a9a.png)
+
 ## Setup
 
 ### Install
