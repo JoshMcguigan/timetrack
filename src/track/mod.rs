@@ -1,4 +1,4 @@
-use notify::{DebouncedEvent, RecommendedWatcher, RecursiveMode, Watcher};
+use notify::DebouncedEvent;
 use std::collections::HashSet;
 use std::fs::OpenOptions;
 use std::io::Write;
@@ -11,9 +11,6 @@ use std::time::Duration;
 use std::time::Instant;
 use std::time::SystemTime;
 use TimeTracker;
-use std::sync::mpsc::Sender;
-use notify::FsEventWatcher;
-use notify;
 use watcher;
 
 impl<'a> TimeTracker<'a> {
