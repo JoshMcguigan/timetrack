@@ -13,6 +13,7 @@ mod clear;
 mod config;
 mod schedule;
 mod track;
+mod watcher;
 
 use config::Configuration;
 
