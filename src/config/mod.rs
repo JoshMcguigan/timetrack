@@ -11,6 +11,8 @@ use std::path::Path;
 use std::path::PathBuf;
 use toml;
 use TimeTracker;
+use watcher;
+use std::sync::mpsc::channel;
 
 pub struct Configuration {
     user_config_path: PathBuf, // this file should not be read outside this module
@@ -78,6 +80,19 @@ pub fn get_config() -> Configuration {
 impl<'a> TimeTracker<'a> {
     pub fn print_config(&self) {
         println!("{}", self.config);
+        println!("Starting self test..");
+        let (tx, _rx) = channel();
+        for track_path in &self.config.track_paths {
+            match watcher::get_watcher(track_path, tx.clone()) {
+                Ok(_) => {
+                    println!("Successfully added watcher for path {}", track_path.to_string_lossy());
+                },
+                Err(err) => {
+                    println!("Error {} adding watcher for path {:?}", err, track_path.to_string_lossy());
+                },
+            };
+        }
+        println!("Completed self test.");
     }
 }
 

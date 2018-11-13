@@ -1,4 +1,4 @@
-use notify::{DebouncedEvent, RecommendedWatcher, RecursiveMode, Watcher};
+use notify::DebouncedEvent;
 use std::collections::HashSet;
 use std::fs::OpenOptions;
 use std::io::Write;
@@ -11,6 +11,7 @@ use std::time::Duration;
 use std::time::Instant;
 use std::time::SystemTime;
 use TimeTracker;
+use watcher;
 
 impl<'a> TimeTracker<'a> {
     pub fn track(&self) {
@@ -19,11 +20,10 @@ impl<'a> TimeTracker<'a> {
         let mut watchers = vec![]; // need to keep ownership of watchers so they aren't dropped at end of for-loop
 
         for track_path in &self.config.track_paths {
-            let mut watcher: RecommendedWatcher =
-                Watcher::new(tx.clone(), Duration::from_secs(0)).unwrap();
-            watcher.watch(track_path, RecursiveMode::Recursive).unwrap();
-
-            watchers.push(watcher);
+            match watcher::get_watcher(track_path, tx.clone()) {
+                Ok(watcher) => watchers.push(watcher),
+                Err(_) => {}, // errors are silent here, but reported by timetrack config
+            }
         }
 
         let mut first_record_time;
