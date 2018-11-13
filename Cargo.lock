@@ -435,7 +435,7 @@ dependencies = [
 
 [[package]]
 name = "timetrack"
-version = "0.2.5"
+version = "0.2.6"
 dependencies = [
  "clap 2.32.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "directories 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",

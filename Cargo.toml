@@ -1,6 +1,6 @@
 [package]
 name = "timetrack"
-version = "0.2.5"
+version = "0.2.6"
 authors = ["Josh Mcguigan"]
 description = "Automatically track how you are spending your time by watching the file system"
 repository = "https://github.com/JoshMcguigan/timetrack"
