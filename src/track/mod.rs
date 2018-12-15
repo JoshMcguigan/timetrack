@@ -12,6 +12,9 @@ use std::time::Instant;
 use std::time::SystemTime;
 use TimeTracker;
 use watcher;
+use std::collections::HashMap;
+
+mod git;
 
 impl<'a> TimeTracker<'a> {
     pub fn track(&self) {
@@ -54,20 +57,42 @@ impl<'a> TimeTracker<'a> {
                 Err(e) => println!("watch error: {:?}", e),
             }
 
-            let mut projects = HashSet::new();
-            for event in &events {
-                if let Some(path) = get_path_from_event(event) {
-                    if let Some(project) = self.extract_project_name(path) {
-                        trace!("File change detected on {:?}", path);
-                        // dedup project list by inserting into hashmap
-                        projects.insert(project);
+            events.iter()
+                .filter_map(get_path_from_event)
+                .filter_map(|path| {
+                    match self.extract_project_name(path) {
+                        None => None,
+                        Some(project) => {
+                            trace!("File change detected on {:?}", path);
+                            Some((project, path))
+                        },
                     }
-                }
-            }
+                })
+                .fold(HashMap::new(), |mut acc, (project, path)| {
+                    acc.entry(project)
+                        .or_insert_with(Vec::new)
+                        .push(path.to_string_lossy().into_owned());
 
-            for project in projects {
-                self.store_project(&project);
-            }
+                    acc
+                })
+                .into_iter()
+                .filter_map(|(project, paths)| {
+                    let dir = match &paths.get(0) {
+                        Some(path) => path.split(&project).next().unwrap().to_owned() + &project,
+                        None => panic!("This vec should never be empty")
+                    };
+                    match git::contains_file_which_would_not_be_ignored(dir, &paths) {
+                        true => {
+                            debug!("Found non-ignored changes for {:?}", project);
+                            Some(project)
+                        },
+                        false => {
+                            debug!("All changes to {:?} were git ignored", project);
+                            None
+                        },
+                    }
+                })
+                .for_each(|project| self.store_project(&project));
         }
     }
 
