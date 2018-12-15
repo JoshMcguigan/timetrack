@@ -28,9 +28,10 @@ impl<'a> TimeTracker<'a> {
 
         let mut first_record_time;
         let write_delay = Duration::from_secs(2);
-        let mut events = vec![];
 
         loop {
+            let mut events = vec![];
+
             // block waiting for the first event
             match rx.recv() {
                 Ok(event) => {

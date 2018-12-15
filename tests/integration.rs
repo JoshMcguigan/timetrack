@@ -99,7 +99,21 @@ fn create_filesystem_noise() {
         write!(file, "testing");
     }
 
-    let sleep_duration = time::Duration::from_millis(500);
+    let sleep_duration = time::Duration::from_millis(2500);
+    thread::sleep(sleep_duration);
+
+    {
+        let mut file = OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create(true)
+            .append(true)
+            .open(&test_file_path)
+            .unwrap();
+        write!(file, "testing");
+    }
+
+    let sleep_duration = time::Duration::from_millis(2500);
     thread::sleep(sleep_duration);
 
     fs::remove_file(&test_file_path).unwrap();
