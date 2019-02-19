@@ -49,7 +49,8 @@ impl<'a> TimeTracker<'a> {
             .open(get_plist_file_path())
             .expect("Unable to open or create plist file");
 
-        write!(&mut f, "{}", get_plist_file_contents());
+        write!(&mut f, "{}", get_plist_file_contents())
+            .expect("Failed to schedule TimeTrack");
         println!("TimeTrack scheduled. Logout/login to start tracking.");
     }
 

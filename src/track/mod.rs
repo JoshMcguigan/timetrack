@@ -1,5 +1,4 @@
 use notify::DebouncedEvent;
-use std::collections::HashSet;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::Path;
@@ -23,9 +22,9 @@ impl<'a> TimeTracker<'a> {
         let mut watchers = vec![]; // need to keep ownership of watchers so they aren't dropped at end of for-loop
 
         for track_path in &self.config.track_paths {
-            match watcher::get_watcher(track_path, tx.clone()) {
-                Ok(watcher) => watchers.push(watcher),
-                Err(_) => {}, // errors are silent here, but reported by timetrack config
+            // errors are silent here, but reported by timetrack config
+            if let Ok(watcher) = watcher::get_watcher(track_path, tx.clone()) {
+                watchers.push(watcher);
             }
         }
 
@@ -81,15 +80,12 @@ impl<'a> TimeTracker<'a> {
                         Some(path) => path.split(&project).next().unwrap().to_owned() + &project,
                         None => panic!("This vec should never be empty")
                     };
-                    match git::contains_file_which_would_not_be_ignored(dir, &paths) {
-                        true => {
-                            debug!("Found non-ignored changes for {:?}", project);
-                            Some(project)
-                        },
-                        false => {
-                            debug!("All changes to {:?} were git ignored", project);
-                            None
-                        },
+                    if git::contains_file_which_would_not_be_ignored(dir, &paths) {
+                        debug!("Found non-ignored changes for {:?}", project);
+                        Some(project)
+                    } else {
+                        debug!("All changes to {:?} were git ignored", project);
+                        None
                     }
                 })
                 .for_each(|project| self.store_project(&project));
@@ -138,7 +134,8 @@ impl<'a> TimeTracker<'a> {
 
         let log = format!("{}/{}", project_name, time);
         debug!("Log stored: {}", log);
-        writeln!(&mut file, "{}", log);
+        writeln!(&mut file, "{}", log)
+            .unwrap_or_else(|_| error!("Failed to write raw data"));
     }
 }
 

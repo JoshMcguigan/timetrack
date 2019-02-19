@@ -1,6 +1,5 @@
 use std::path::Path;
-use std::io::Write;
-use std::process::{Command, Stdio};
+use std::process::Command;
 use std::ffi::OsStr;
 
 pub fn contains_file_which_would_not_be_ignored<I, S, P>(dir: P, paths: I) -> bool

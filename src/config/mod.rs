@@ -151,5 +151,6 @@ fn init_config_file(config_file_path: impl AsRef<Path>) {
         &mut f,
         "{}",
         toml::to_string(&default_config).expect("Failed to convert default user config to TOML")
-    );
+    )
+        .expect("Failed to initialize configuration file");
 }

@@ -42,7 +42,8 @@ impl<'a> TimeTracker<'a> {
                 .unwrap();
 
             for span in &new_spans {
-                writeln!(&mut processed_data_file, "{}", span);
+                writeln!(&mut processed_data_file, "{}", span)
+                    .unwrap_or_else(|_| error!("Failed to write processed data"));
             }
         }
 
@@ -54,7 +55,8 @@ impl<'a> TimeTracker<'a> {
         {
             use std::fmt::Write;
             for raw_log in last_timestamp_per_project {
-                writeln!(&mut updated_raw_log, "{}", raw_log);
+                // unwrap is safe here because we are writing to a String
+                writeln!(&mut updated_raw_log, "{}", raw_log).unwrap();
             }
         }
         {
@@ -64,7 +66,8 @@ impl<'a> TimeTracker<'a> {
                 .truncate(true)
                 .open(&self.config.raw_data_path)
                 .unwrap();
-            write!(&mut raw_data_file, "{}", updated_raw_log);
+            write!(&mut raw_data_file, "{}", updated_raw_log)
+                .unwrap_or_else(|_| error!("Failed to write updated raw data"));
         }
 
         // process spans from processed file as normal
