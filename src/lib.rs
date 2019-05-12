@@ -1,13 +1,3 @@
-extern crate directories;
-extern crate notify;
-extern crate toml;
-#[macro_use]
-extern crate serde_derive;
-#[macro_use]
-extern crate log;
-#[macro_use]
-extern crate prettytable;
-
 mod calc;
 mod clear;
 mod config;

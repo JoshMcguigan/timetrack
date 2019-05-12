@@ -6,7 +6,7 @@ use std::process::Command;
 use std::process::Stdio;
 use std::thread;
 use std::time;
-extern crate timetrack;
+
 use timetrack::get_config;
 
 struct Backup;

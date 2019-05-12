@@ -1,5 +1,6 @@
 use crate::watcher;
 use crate::TimeTracker;
+use log::{debug, error, log, trace};
 use notify::DebouncedEvent;
 use std::collections::HashMap;
 use std::fs::OpenOptions;

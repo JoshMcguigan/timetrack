@@ -1,15 +1,9 @@
-#[macro_use]
-extern crate clap;
-use clap::App;
+use clap::{crate_version, App};
 
-extern crate timetrack;
 use clap::Arg;
 use clap::SubCommand;
 use timetrack::get_config;
 use timetrack::TimeTracker;
-
-extern crate env_logger;
-extern crate log;
 
 mod logger;
 use crate::logger::logger_init;

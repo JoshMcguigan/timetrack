@@ -2,6 +2,7 @@ use crate::watcher;
 use crate::TimeTracker;
 use directories::BaseDirs;
 use directories::ProjectDirs;
+use serde_derive::{Deserialize, Serialize};
 use std::fmt;
 use std::fmt::Display;
 use std::fmt::Formatter;
@@ -22,7 +23,7 @@ pub struct Configuration {
 }
 
 impl Display for Configuration {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f,
 // Caution: The indent level below matters
 "TimeTrack Configuration

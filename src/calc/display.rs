@@ -1,4 +1,5 @@
 use prettytable::Table;
+use prettytable::{cell, row};
 use std::collections::HashMap;
 
 static NO_DATA_WARNING: &'static str = "No time track data found";

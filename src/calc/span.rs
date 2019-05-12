@@ -21,7 +21,7 @@ impl Span {
 }
 
 impl Display for Span {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{}/{}/{}", self.name, self.start, self.end,)
     }
 }
