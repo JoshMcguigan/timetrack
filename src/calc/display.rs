@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use prettytable::Table;
+use std::collections::HashMap;
 
 static NO_DATA_WARNING: &'static str = "No time track data found";
 
@@ -22,10 +22,7 @@ fn format(data: HashMap<String, u64>) -> Vec<(String, String)> {
         }
     }
 
-    output_rows
-        .sort_by(|(a, _), (b, _)|
-            a.cmp(b)
-        ); // alphabetize the output by project name
+    output_rows.sort_by(|(a, _), (b, _)| a.cmp(b)); // alphabetize the output by project name
 
     output_rows
 }

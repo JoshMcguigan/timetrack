@@ -1,3 +1,5 @@
+use crate::watcher;
+use crate::TimeTracker;
 use directories::BaseDirs;
 use directories::ProjectDirs;
 use std::fmt;
@@ -9,10 +11,8 @@ use std::io::Read;
 use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
-use toml;
-use TimeTracker;
-use watcher;
 use std::sync::mpsc::channel;
+use toml;
 
 pub struct Configuration {
     user_config_path: PathBuf, // this file should not be read outside this module
@@ -85,11 +85,18 @@ impl<'a> TimeTracker<'a> {
         for track_path in &self.config.track_paths {
             match watcher::get_watcher(track_path, tx.clone()) {
                 Ok(_) => {
-                    println!("Successfully added watcher for path {}", track_path.to_string_lossy());
-                },
+                    println!(
+                        "Successfully added watcher for path {}",
+                        track_path.to_string_lossy()
+                    );
+                }
                 Err(err) => {
-                    println!("Error {} adding watcher for path {:?}", err, track_path.to_string_lossy());
-                },
+                    println!(
+                        "Error {} adding watcher for path {:?}",
+                        err,
+                        track_path.to_string_lossy()
+                    );
+                }
             };
         }
         println!("Completed self test.");
@@ -152,5 +159,5 @@ fn init_config_file(config_file_path: impl AsRef<Path>) {
         "{}",
         toml::to_string(&default_config).expect("Failed to convert default user config to TOML")
     )
-        .expect("Failed to initialize configuration file");
+    .expect("Failed to initialize configuration file");
 }

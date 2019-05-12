@@ -15,9 +15,9 @@ mod schedule;
 mod track;
 mod watcher;
 
-use config::Configuration;
+use crate::config::Configuration;
 
-pub use config::get_config;
+pub use crate::config::get_config;
 
 pub struct TimeTracker<'a> {
     config: &'a Configuration,

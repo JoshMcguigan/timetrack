@@ -1,5 +1,5 @@
+use crate::TimeTracker;
 use std::fs::OpenOptions;
-use TimeTracker;
 
 impl<'a> TimeTracker<'a> {
     pub fn clear(&self) {

@@ -17,11 +17,13 @@ impl Backup {
         fs::copy(
             &config.raw_data_path,
             (&config.raw_data_path).clone().with_extension("bak"),
-        ).unwrap();
+        )
+        .unwrap();
         fs::copy(
             &config.processed_data_path,
             (&config.processed_data_path).clone().with_extension("bak"),
-        ).unwrap();
+        )
+        .unwrap();
 
         Backup
     }
@@ -33,11 +35,13 @@ impl Drop for Backup {
         fs::rename(
             (&config.raw_data_path).clone().with_extension("bak"),
             &config.raw_data_path,
-        ).unwrap();
+        )
+        .unwrap();
         fs::rename(
             (&config.processed_data_path).clone().with_extension("bak"),
             &config.processed_data_path,
-        ).unwrap();
+        )
+        .unwrap();
     }
 }
 
@@ -96,7 +100,7 @@ fn create_filesystem_noise() {
             .append(true)
             .open(&test_file_path)
             .unwrap();
-        write!(file, "testing");
+        write!(file, "testing").unwrap();
     }
 
     let sleep_duration = time::Duration::from_millis(2500);
@@ -110,7 +114,7 @@ fn create_filesystem_noise() {
             .append(true)
             .open(&test_file_path)
             .unwrap();
-        write!(file, "testing");
+        write!(file, "testing").unwrap();
     }
 
     let sleep_duration = time::Duration::from_millis(2500);

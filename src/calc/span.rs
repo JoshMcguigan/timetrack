@@ -1,4 +1,4 @@
-use calc::raw_log::RawLog;
+use crate::calc::raw_log::RawLog;
 use std::cmp::max;
 use std::cmp::min;
 use std::collections::HashMap;
@@ -124,7 +124,8 @@ pub fn get_vec_raw_logs_from_map_last_timestamp_per_project(
         .map(|(project_name, timestamp)| RawLog {
             name: project_name,
             timestamp,
-        }).collect();
+        })
+        .collect();
 
     raw_logs.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
 

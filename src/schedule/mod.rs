@@ -1,9 +1,9 @@
+use crate::TimeTracker;
 use directories::UserDirs;
 use std::fs;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::PathBuf;
-use TimeTracker;
 
 #[allow(dead_code)]
 fn not_supported() {
@@ -49,8 +49,7 @@ impl<'a> TimeTracker<'a> {
             .open(get_plist_file_path())
             .expect("Unable to open or create plist file");
 
-        write!(&mut f, "{}", get_plist_file_contents())
-            .expect("Failed to schedule TimeTrack");
+        write!(&mut f, "{}", get_plist_file_contents()).expect("Failed to schedule TimeTrack");
         println!("TimeTrack scheduled. Logout/login to start tracking.");
     }
 

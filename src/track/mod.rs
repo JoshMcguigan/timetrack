@@ -1,4 +1,7 @@
+use crate::watcher;
+use crate::TimeTracker;
 use notify::DebouncedEvent;
+use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::Path;
@@ -9,9 +12,6 @@ use std::thread;
 use std::time::Duration;
 use std::time::Instant;
 use std::time::SystemTime;
-use TimeTracker;
-use watcher;
-use std::collections::HashMap;
 
 mod git;
 
@@ -56,15 +56,14 @@ impl<'a> TimeTracker<'a> {
                 Err(e) => println!("watch error: {:?}", e),
             }
 
-            events.iter()
+            events
+                .iter()
                 .filter_map(get_path_from_event)
-                .filter_map(|path| {
-                    match self.extract_project_name(path) {
-                        None => None,
-                        Some(project) => {
-                            trace!("File change detected on {:?}", path);
-                            Some((project, path))
-                        },
+                .filter_map(|path| match self.extract_project_name(path) {
+                    None => None,
+                    Some(project) => {
+                        trace!("File change detected on {:?}", path);
+                        Some((project, path))
                     }
                 })
                 .fold(HashMap::new(), |mut acc, (project, path)| {
@@ -78,7 +77,7 @@ impl<'a> TimeTracker<'a> {
                 .filter_map(|(project, paths)| {
                     let dir = match &paths.get(0) {
                         Some(path) => path.split(&project).next().unwrap().to_owned() + &project,
-                        None => panic!("This vec should never be empty")
+                        None => panic!("This vec should never be empty"),
                     };
                     if git::contains_file_which_would_not_be_ignored(dir, &paths) {
                         debug!("Found non-ignored changes for {:?}", project);
@@ -134,8 +133,7 @@ impl<'a> TimeTracker<'a> {
 
         let log = format!("{}/{}", project_name, time);
         debug!("Log stored: {}", log);
-        writeln!(&mut file, "{}", log)
-            .unwrap_or_else(|_| error!("Failed to write raw data"));
+        writeln!(&mut file, "{}", log).unwrap_or_else(|_| error!("Failed to write raw data"));
     }
 }
 
@@ -156,7 +154,7 @@ fn get_path_from_event(event: &DebouncedEvent) -> Option<&Path> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use config::Configuration;
+    use crate::config::Configuration;
 
     #[test]
     fn extract_project_name_some() {

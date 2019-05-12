@@ -1,8 +1,8 @@
+use crate::TimeTracker;
 use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::Read;
 use std::io::Write;
-use TimeTracker;
 
 mod raw_log;
 use self::raw_log::raw_logs_from;
@@ -13,8 +13,8 @@ use self::span::{get_spans_from, Span};
 mod display;
 use self::display::display;
 use self::span::get_last_timestamp_per_project;
-use calc::span::get_vec_raw_logs_from_map_last_timestamp_per_project;
-use calc::span::spans_from;
+use crate::calc::span::get_vec_raw_logs_from_map_last_timestamp_per_project;
+use crate::calc::span::spans_from;
 
 impl<'a> TimeTracker<'a> {
     pub fn calc(&self) {
