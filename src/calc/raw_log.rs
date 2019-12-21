@@ -1,3 +1,5 @@
+use crate::TimeTrackerError;
+use std::convert::TryFrom;
 use std::fmt;
 use std::fmt::Display;
 use std::fmt::Formatter;
@@ -8,24 +10,33 @@ pub struct RawLog {
     pub timestamp: u64,
 }
 
-pub fn raw_logs_from(raw_data: &str) -> Vec<RawLog> {
+pub fn raw_logs_from(raw_data: &str) -> Result<Vec<RawLog>, TimeTrackerError> {
     let mut raw_logs = vec![];
 
     for line in raw_data.lines() {
-        raw_logs.push(RawLog::from(line));
+        let raw_log = RawLog::try_from(line)?;
+        raw_logs.push(raw_log);
     }
 
-    raw_logs
+    Ok(raw_logs)
 }
 
-impl<'a> From<&'a str> for RawLog {
-    fn from(raw_data: &'a str) -> Self {
-        // TODO convert this to try_from
+impl<'a> TryFrom<&'a str> for RawLog {
+    type Error = TimeTrackerError;
+    fn try_from(raw_data: &'a str) -> Result<Self, Self::Error> {
         let mut parts = raw_data.split('/');
-        RawLog {
-            name: parts.next().unwrap().to_string(),
-            timestamp: parts.next().unwrap().parse::<u64>().unwrap(),
-        }
+        let name = match parts.next() {
+            Some(v) => v.to_string(),
+            None => return Err(TimeTrackerError::InvalidLineError(raw_data.to_string())),
+        };
+        let timestamp = match parts.next() {
+            Some(v) => match v.parse::<u64>() {
+                Ok(parsed) => parsed,
+                Err(_) => return Err(TimeTrackerError::InvalidTimestampError(v.to_string())),
+            },
+            None => return Err(TimeTrackerError::InvalidLineError(raw_data.to_string())),
+        };
+        Ok(RawLog { name, timestamp })
     }
 }
 
@@ -45,7 +56,7 @@ mod tests {
 
         let raw_logs = raw_logs_from(raw_data);
 
-        assert_eq!(2, raw_logs.len());
+        assert_eq!(2, raw_logs.unwrap().len());
     }
 
     #[test]
@@ -56,7 +67,7 @@ mod tests {
                 name: String::from("josh"),
                 timestamp: 123u64
             },
-            RawLog::from(raw_data)
+            RawLog::try_from(raw_data).unwrap()
         );
     }
 

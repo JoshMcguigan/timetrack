@@ -1,7 +1,9 @@
 use crate::calc::raw_log::RawLog;
+use crate::TimeTrackerError;
 use std::cmp::max;
 use std::cmp::min;
 use std::collections::HashMap;
+use std::convert::TryFrom;
 use std::fmt;
 use std::fmt::Display;
 use std::fmt::Formatter;
@@ -26,24 +28,39 @@ impl Display for Span {
     }
 }
 
-pub fn spans_from(processed_data: &str) -> Vec<Span> {
+pub fn spans_from(processed_data: &str) -> Result<Vec<Span>, TimeTrackerError> {
     let mut spans = vec![];
 
     for line in processed_data.lines() {
-        spans.push(Span::from(line));
+        spans.push(Span::try_from(line)?);
     }
 
-    spans
+    Ok(spans)
 }
 
-impl<'a> From<&'a str> for Span {
-    fn from(raw_data: &'a str) -> Self {
+impl<'a> TryFrom<&'a str> for Span {
+    type Error = TimeTrackerError;
+    fn try_from(raw_data: &'a str) -> Result<Self, Self::Error> {
         let mut parts = raw_data.split('/');
-        Span {
-            name: parts.next().unwrap().to_string(),
-            start: parts.next().unwrap().parse::<u64>().unwrap(),
-            end: parts.next().unwrap().parse::<u64>().unwrap(),
-        }
+        let name = match parts.next() {
+            Some(v) => v.to_string(),
+            None => return Err(TimeTrackerError::InvalidLineError(raw_data.to_string())),
+        };
+        let start = match parts.next() {
+            Some(v) => match v.parse::<u64>() {
+                Ok(parsed) => parsed,
+                Err(_) => return Err(TimeTrackerError::InvalidTimestampError(v.to_string())),
+            },
+            None => return Err(TimeTrackerError::InvalidLineError(raw_data.to_string())),
+        };
+        let end = match parts.next() {
+            Some(v) => match v.parse::<u64>() {
+                Ok(parsed) => parsed,
+                Err(_) => return Err(TimeTrackerError::InvalidTimestampError(v.to_string())),
+            },
+            None => return Err(TimeTrackerError::InvalidLineError(raw_data.to_string())),
+        };
+        Ok(Span { name, start, end })
     }
 }
 
