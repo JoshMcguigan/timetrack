@@ -8,7 +8,7 @@ use timetrack::TimeTracker;
 mod logger;
 use crate::logger::logger_init;
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = App::new("TimeTrack")
         .version(crate_version!())
         .arg(
@@ -53,6 +53,7 @@ fn main() {
     } else if matches.subcommand_matches("unschedule").is_some() {
         time_tracker.unschedule();
     } else {
-        time_tracker.calc();
+        time_tracker.calc()?;
     }
+    Ok(())
 }

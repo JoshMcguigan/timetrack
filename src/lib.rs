@@ -1,6 +1,7 @@
 mod calc;
 mod clear;
 mod config;
+mod error;
 mod schedule;
 mod track;
 mod watcher;
@@ -8,6 +9,8 @@ mod watcher;
 use crate::config::Configuration;
 
 pub use crate::config::get_config;
+
+pub use error::TimeTrackerError;
 
 pub struct TimeTracker<'a> {
     config: &'a Configuration,

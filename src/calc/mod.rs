@@ -1,4 +1,4 @@
-use crate::TimeTracker;
+use crate::{TimeTracker, TimeTrackerError};
 use log::{error, log};
 use std::collections::HashMap;
 use std::fs::OpenOptions;
@@ -18,7 +18,7 @@ use crate::calc::span::get_vec_raw_logs_from_map_last_timestamp_per_project;
 use crate::calc::span::spans_from;
 
 impl<'a> TimeTracker<'a> {
-    pub fn calc(&self) {
+    pub fn calc(&self) -> Result<(), TimeTrackerError> {
         // process raw data into spans
         let mut raw_data = String::new();
         {
@@ -30,7 +30,7 @@ impl<'a> TimeTracker<'a> {
                 .read_to_string(&mut raw_data)
                 .expect("something went wrong reading the file");
         }
-        let new_spans = get_spans_from(raw_logs_from(&raw_data));
+        let new_spans = get_spans_from(raw_logs_from(&raw_data)?);
 
         // append spans to processed data file
         {
@@ -80,9 +80,10 @@ impl<'a> TimeTracker<'a> {
         processed_data_file
             .read_to_string(&mut all_spans_string)
             .expect("Failed to read processed data");
-        let all_spans = spans_from(&all_spans_string);
+        let all_spans = spans_from(&all_spans_string)?;
 
         display(calculate_project_total_time(all_spans));
+        Ok(())
     }
 }
 
